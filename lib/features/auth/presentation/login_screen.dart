@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/api_config.dart';
 import 'auth_notifier.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -165,6 +166,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             ),
                           ),
                   ),
+                  if (AppConfig.useMockData) ...[
+                    const SizedBox(height: 12),
+                    OutlinedButton.icon(
+                      onPressed: authState.isLoading
+                          ? null
+                          : () {
+                              ref
+                                  .read(authProvider.notifier)
+                                  .login('budi01', 'rahasia123');
+                            },
+                      icon: const Icon(Icons.bolt),
+                      label: const Text('Masuk Cepat (Mode Mockup)'),
+                    ),
+                  ],
                   const SizedBox(height: 16),
                   Text(
                     'Pendaftaran akun warga dilakukan melalui portal website resmi PBB Kota Surakarta.',

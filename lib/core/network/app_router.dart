@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 import '../../features/auth/presentation/auth_notifier.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/home/presentation/home_screen.dart';
+import '../../features/nop/data/nop_model.dart';
+import '../../features/nop/presentation/nop_detail_screen.dart';
 import '../../features/nop/presentation/nop_list_screen.dart';
 import '../../features/akun/presentation/akun_screen.dart';
 import '../../features/pengajuan/presentation/objek_baru_screen.dart';
@@ -22,18 +24,9 @@ final routerProvider = Provider<GoRouter>((ref) {
       final isAuth = authState.status == AuthStatus.authenticated;
       final isLoggingIn = state.matchedLocation == '/login';
 
-      if (authState.status == AuthStatus.initial) {
-        return null;
-      }
-
-      if (!isAuth && !isLoggingIn) {
-        return '/login';
-      }
-
-      if (isAuth && isLoggingIn) {
-        return '/';
-      }
-
+      if (authState.status == AuthStatus.initial) return null;
+      if (!isAuth && !isLoggingIn) return '/login';
+      if (isAuth && isLoggingIn) return '/';
       return null;
     },
     routes: [
@@ -73,8 +66,23 @@ final routerProvider = Provider<GoRouter>((ref) {
         ],
       ),
       GoRoute(
+        path: '/nop/detail',
+        builder: (context, state) {
+          final item = state.extra as NopItemModel;
+          return NopDetailScreen(item: item);
+        },
+      ),
+      GoRoute(
         path: '/pengajuan/objek-baru',
-        builder: (context, state) => const ObjekBaruScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return ObjekBaruScreen(
+            revisiId: extra?['revisiId'] as int?,
+            initialData: extra?['initialData'] as Map<String, dynamic>?,
+            existingBerkas:
+                (extra?['existingBerkas'] as Map<String, String>?) ?? const {},
+          );
+        },
       ),
       GoRoute(
         path: '/pengajuan/pilih-mutasi',
@@ -82,7 +90,15 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: '/pengajuan/mutasi-penuh',
-        builder: (context, state) => const MutasiPenuhScreen(),
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>?;
+          return MutasiPenuhScreen(
+            revisiId: extra?['revisiId'] as int?,
+            initialData: extra?['initialData'] as Map<String, dynamic>?,
+            existingBerkas:
+                (extra?['existingBerkas'] as Map<String, String>?) ?? const {},
+          );
+        },
       ),
       GoRoute(
         path: '/pengajuan/mutasi-sebagian',

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/api_config.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/dio_client.dart';
 import '../../../core/network/token_storage.dart';
@@ -21,6 +22,24 @@ class AuthRepository {
     required String username,
     required String password,
   }) async {
+    if (AppConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 500));
+      final mockUser = UserModel(
+        id: 7,
+        name: 'Budi Santoso',
+        username: username.isNotEmpty ? username : 'budi01',
+        nik: '3372010101900001',
+        npwp: '12.345.678.9-526.000',
+      );
+      const mockToken = 'mock_token_demo_pbb_solo';
+      await _tokenStorage.saveToken(mockToken);
+      return ApiResponse<LoginResponse>(
+        success: true,
+        message: 'Login berhasil (Mode Mockup)',
+        data: LoginResponse(token: mockToken, user: mockUser),
+      );
+    }
+
     try {
       final response = await _dio.post(
         '/auth/login',
@@ -60,6 +79,21 @@ class AuthRepository {
   }
 
   Future<ApiResponse<UserModel>> getProfile() async {
+    if (AppConfig.useMockData) {
+      await Future.delayed(const Duration(milliseconds: 200));
+      return ApiResponse<UserModel>(
+        success: true,
+        message: 'OK',
+        data: UserModel(
+          id: 7,
+          name: 'Budi Santoso',
+          username: 'budi01',
+          nik: '3372010101900001',
+          npwp: '12.345.678.9-526.000',
+        ),
+      );
+    }
+
     try {
       final response = await _dio.get('/me');
       return ApiResponse<UserModel>.fromJson(
@@ -81,6 +115,11 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
+    if (AppConfig.useMockData) {
+      await _tokenStorage.clearToken();
+      return;
+    }
+
     try {
       await _dio.post('/auth/logout');
     } catch (_) {
