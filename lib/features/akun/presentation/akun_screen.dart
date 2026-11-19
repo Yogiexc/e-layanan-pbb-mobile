@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/dio_client.dart';
+import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/theme_notifier.dart';
 import '../../../core/utils/validators.dart';
 import '../../auth/presentation/auth_notifier.dart';
@@ -63,7 +64,8 @@ class AkunScreen extends ConsumerWidget {
                 Navigator.pop(ctx);
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Text('Username berhasil diubah menjadi $newUsername.'),
+                    content:
+                        Text('Username berhasil diubah menjadi $newUsername.'),
                   ),
                 );
               }
@@ -105,12 +107,8 @@ class AkunScreen extends ConsumerWidget {
                   decoration: const InputDecoration(
                     labelText: 'Password Baru (min. 8 karakter)',
                   ),
-                  validator: (v) {
-                    if (v == null || v.length < 8) {
-                      return 'Minimal 8 karakter';
-                    }
-                    return null;
-                  },
+                  validator: (v) =>
+                      (v == null || v.length < 8) ? 'Minimal 8 karakter' : null,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(
@@ -119,12 +117,8 @@ class AkunScreen extends ConsumerWidget {
                   decoration: const InputDecoration(
                     labelText: 'Konfirmasi Password Baru',
                   ),
-                  validator: (v) {
-                    if (v != newCtrl.text) {
-                      return 'Konfirmasi password tidak cocok';
-                    }
-                    return null;
-                  },
+                  validator: (v) =>
+                      v != newCtrl.text ? 'Konfirmasi password tidak cocok' : null,
                 ),
               ],
             ),
@@ -179,56 +173,125 @@ class AkunScreen extends ConsumerWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user?.name ?? 'Wajib Pajak',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w700,
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: AppTheme.primary,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      width: 52,
+                      height: 52,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.16),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: const Icon(
+                        Icons.person_rounded,
+                        color: Colors.white,
+                        size: 28,
+                      ),
                     ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            user?.name ?? 'Wajib Pajak',
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            '@${user?.username ?? "-"}',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.8),
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 18),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryDeep,
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '@${user?.username ?? "-"}',
-                    style: Theme.of(context).textTheme.bodySmall,
+                  child: Column(
+                    children: [
+                      _ProfileIdentityRow('NIK', AppValidators.maskNik(user?.nik)),
+                      const SizedBox(height: 8),
+                      _ProfileIdentityRow(
+                        'NPWP',
+                        user?.npwp?.isNotEmpty == true ? user!.npwp! : '-',
+                      ),
+                    ],
                   ),
-                  const Divider(height: 24),
-                  _AccountInfoRow('NIK', AppValidators.maskNik(user?.nik)),
-                  const SizedBox(height: 10),
-                  _AccountInfoRow(
-                    'NPWP',
-                    user?.npwp?.isNotEmpty == true ? user!.npwp! : '-',
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
-          Card(
+          const SizedBox(height: 20),
+          Text(
+            'Keamanan & Preferensi',
+            style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  color: isDark
+                      ? AppTheme.textSecondaryDark
+                      : AppTheme.textSecondaryLight,
+                ),
+          ),
+          const SizedBox(height: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: Theme.of(context).colorScheme.outline),
+              boxShadow: AppTheme.softShadow(context),
+            ),
             child: Column(
               children: [
                 ListTile(
-                  leading: const Icon(Icons.alternate_email),
-                  title: const Text('Ubah Username'),
-                  trailing: const Icon(Icons.chevron_right),
+                  leading: const Icon(Icons.alternate_email_rounded),
+                  title: const Text(
+                    'Ubah Username',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showChangeUsernameDialog(context, ref),
                 ),
                 const Divider(),
                 ListTile(
-                  leading: const Icon(Icons.lock_outline),
-                  title: const Text('Ganti Password'),
-                  trailing: const Icon(Icons.chevron_right),
+                  leading: const Icon(Icons.lock_outline_rounded),
+                  title: const Text(
+                    'Ganti Password',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded),
                   onTap: () => _showChangePasswordDialog(context, ref),
                 ),
                 const Divider(),
                 SwitchListTile(
-                  secondary: Icon(isDark ? Icons.dark_mode : Icons.light_mode),
-                  title: const Text('Mode Gelap'),
+                  secondary: Icon(
+                    isDark ? Icons.dark_mode_rounded : Icons.light_mode_rounded,
+                  ),
+                  title: const Text(
+                    'Mode Gelap',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                  ),
                   subtitle: const Text('Disimpan lokal di perangkat ini'),
                   value: isDark,
                   onChanged: (val) =>
@@ -240,11 +303,11 @@ class AkunScreen extends ConsumerWidget {
           const SizedBox(height: 20),
           OutlinedButton.icon(
             style: OutlinedButton.styleFrom(
-              foregroundColor: const Color(0xFFB91C1C),
-              side: const BorderSide(color: Color(0xFFB91C1C)),
+              foregroundColor: AppTheme.statusRejectedText,
+              side: const BorderSide(color: AppTheme.statusRejectedText),
             ),
-            icon: const Icon(Icons.logout),
-            label: const Text('Keluar'),
+            icon: const Icon(Icons.logout_rounded),
+            label: const Text('Keluar dari Akun'),
             onPressed: () {
               showDialog(
                 context: context,
@@ -265,7 +328,7 @@ class AkunScreen extends ConsumerWidget {
                       },
                       child: const Text(
                         'Keluar',
-                        style: TextStyle(color: Color(0xFFB91C1C)),
+                        style: TextStyle(color: AppTheme.statusRejectedText),
                       ),
                     ),
                   ],
@@ -279,24 +342,30 @@ class AkunScreen extends ConsumerWidget {
   }
 }
 
-class _AccountInfoRow extends StatelessWidget {
+class _ProfileIdentityRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _AccountInfoRow(this.label, this.value);
+  const _ProfileIdentityRow(this.label, this.value);
 
   @override
   Widget build(BuildContext context) {
     return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        SizedBox(
-          width: 80,
-          child: Text(label, style: Theme.of(context).textTheme.bodySmall),
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.white.withValues(alpha: 0.72),
+            fontSize: 12,
+          ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            fontSize: 13,
           ),
         ),
       ],
