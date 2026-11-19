@@ -1,24 +1,26 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  // Banking-grade palette: Deep Pine / Emerald + Warm Gold Accent + Crisp Neutral Canvas
-  static const Color primary = Color(0xFF0A4D3C);
-  static const Color primaryDeep = Color(0xFF063327);
-  static const Color primarySoft = Color(0xFFE7F3EF);
-  static const Color accentGold = Color(0xFFD97706);
+  // Identitas visual resmi Pemkot Surakarta / Bapenda Surakarta:
+  // Merah Marun Solo (Crimson Heritage) + Emas Keraton + Kanvas Putih/Abu Bersih
+  static const Color primary = Color(0xFFA61C24);
+  static const Color primaryDeep = Color(0xFF7B1117);
+  static const Color primarySoft = Color(0xFFFDF0F1);
+  static const Color accentGold = Color(0xFFC88A1E);
 
-  static const Color bgLight = Color(0xFFF3F6F5);
+  static const Color bgLight = Color(0xFFF6F6F7);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0xFFE2E8E5);
-  static const Color textPrimaryLight = Color(0xFF0F1B17);
-  static const Color textSecondaryLight = Color(0xFF5A6B65);
+  static const Color borderLight = Color(0xFFE4E4E7);
+  static const Color textPrimaryLight = Color(0xFF18181B);
+  static const Color textSecondaryLight = Color(0xFF52525B);
 
-  static const Color bgDark = Color(0xFF0D1210);
-  static const Color surfaceDark = Color(0xFF161E1B);
-  static const Color borderDark = Color(0xFF26332E);
-  static const Color textPrimaryDark = Color(0xFFF2F6F4);
-  static const Color textSecondaryDark = Color(0xFF94A69F);
+  static const Color bgDark = Color(0xFF111113);
+  static const Color surfaceDark = Color(0xFF1C1C20);
+  static const Color borderDark = Color(0xFF2D2D33);
+  static const Color textPrimaryDark = Color(0xFFF4F4F5);
+  static const Color textSecondaryDark = Color(0xFFA1A1AA);
 
+  // Warna badge status sesuai PRD Bab 5 (Menunggu = oranye, Ditolak = merah, Disetujui/Terdaftar = hijau)
   static const Color statusPendingText = Color(0xFFB45309);
   static const Color statusPendingBg = Color(0xFFFEF3C7);
 
@@ -33,7 +35,7 @@ class AppTheme {
     if (isDark) return const [];
     return [
       BoxShadow(
-        color: const Color(0xFF0A4D3C).withValues(alpha: 0.06),
+        color: const Color(0xFF18181B).withValues(alpha: 0.05),
         blurRadius: 18,
         offset: const Offset(0, 6),
       ),
@@ -116,7 +118,7 @@ class AppTheme {
         fillColor: surfaceLight,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         labelStyle: const TextStyle(color: textSecondaryLight, fontSize: 14),
-        hintStyle: const TextStyle(color: Color(0xFF9AA9A3), fontSize: 14),
+        hintStyle: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderLight),
@@ -173,8 +175,8 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       colorScheme: const ColorScheme.dark(
-        primary: Color(0xFF34D399),
-        onPrimary: Color(0xFF04291E),
+        primary: Color(0xFFEF5350),
+        onPrimary: Color(0xFF2B0608),
         secondary: Color(0xFFFBBF24),
         onSecondary: Color(0xFF2E1A00),
         surface: surfaceDark,
@@ -213,8 +215,8 @@ class AppTheme {
         style: ElevatedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
           elevation: 0,
-          backgroundColor: const Color(0xFF10B981),
-          foregroundColor: const Color(0xFF042419),
+          backgroundColor: const Color(0xFFD32F2F),
+          foregroundColor: Colors.white,
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -227,8 +229,8 @@ class AppTheme {
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
-          foregroundColor: const Color(0xFF34D399),
-          side: const BorderSide(color: Color(0xFF34D399), width: 1.4),
+          foregroundColor: const Color(0xFFEF5350),
+          side: const BorderSide(color: Color(0xFFEF5350), width: 1.4),
           textStyle: const TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w700,
@@ -243,7 +245,7 @@ class AppTheme {
         fillColor: surfaceDark,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
         labelStyle: const TextStyle(color: textSecondaryDark, fontSize: 14),
-        hintStyle: const TextStyle(color: Color(0xFF6B7973), fontSize: 14),
+        hintStyle: const TextStyle(color: Color(0xFF71717A), fontSize: 14),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderDark),
@@ -254,20 +256,20 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFF34D399), width: 1.8),
+          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 1.8),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         height: 68,
         backgroundColor: surfaceDark,
         elevation: 0,
-        indicatorColor: const Color(0xFF34D399).withValues(alpha: 0.16),
+        indicatorColor: const Color(0xFFEF5350).withValues(alpha: 0.16),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
             return const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF34D399),
+              color: Color(0xFFEF5350),
             );
           }
           return const TextStyle(
@@ -278,7 +280,7 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: Color(0xFF34D399), size: 24);
+            return const IconThemeData(color: Color(0xFFEF5350), size: 24);
           }
           return const IconThemeData(color: textSecondaryDark, size: 23);
         }),

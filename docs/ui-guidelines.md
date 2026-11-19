@@ -2,16 +2,15 @@
 
 Dokumen ini menjadi acuan desain antarmuka aplikasi Flutter E-Layanan PBB P2 Kota Solo sesuai ketentuan PRD Frontend.
 
-## 1. Tema & Palet Warna (Material 3)
-Aplikasi mendukung mode terang (Light) dan mode gelap (Dark) yang disimpan di penyimpanan lokal (`shared_preferences`).
+## 1. Tema & Palet Warna (Material 3 - Identitas Pemkot & Bapenda Surakarta)
+Aplikasi mendukung mode terang (Light) dan mode gelap (Dark) yang disimpan di penyimpanan lokal (`shared_preferences`). Palet warna mengadopsi identitas resmi Pemerintah Kota Surakarta & Bapenda Surakarta (Merah Marun khas Solo, Putih bersih, dan aksen Emas Keraton).
 
-- **Primary Color**: Emerald Green / PBB Trust (`#1B5E20` atau `#006C4C`)
-  - Merefleksikan pelayanan publik resmi, perpajakan daerah, ketenangan, dan kepatuhan.
-- **Secondary Color**: Slate Teal (`#006874`)
-- **Background (Light)**: `#F8F9FA`
+- **Primary Color**: Merah Marun Surakarta (`#A61C24` / deep `#7B1117`)
+- **Accent Color**: Emas Keraton (`#C88A1E`)
+- **Background (Light)**: `#F6F6F7`
 - **Surface (Light)**: `#FFFFFF`
-- **Background (Dark)**: `#121212`
-- **Surface (Dark)**: `#1E1E1E`
+- **Background (Dark)**: `#111113`
+- **Surface (Dark)**: `#1C1C20`
 
 ### Warna Badge Status Pengajuan
 Sesuai PRD Bab 5 & Bab 10, badge **wajib selalu menyertakan teks label**, bukan hanya warna:

@@ -192,7 +192,7 @@ class HomeScreen extends ConsumerWidget {
                           title: 'Mutasi PBB',
                           subtitle: 'Penuh, pemecahan, & gabung',
                           icon: Icons.swap_horiz_rounded,
-                          accentColor: const Color(0xFF0F766E),
+                          accentColor: AppTheme.accentGold,
                           onTap: () => context.push('/pengajuan/pilih-mutasi'),
                         ),
                       ),
