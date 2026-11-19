@@ -1,26 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  // Identitas visual resmi Pemkot Surakarta / Bapenda Surakarta:
-  // Merah Marun Solo (Crimson Heritage) + Emas Keraton + Kanvas Putih/Abu Bersih
-  static const Color primary = Color(0xFFA61C24);
-  static const Color primaryDeep = Color(0xFF7B1117);
-  static const Color primarySoft = Color(0xFFFDF0F1);
-  static const Color accentGold = Color(0xFFC88A1E);
+  static const Color primary = Color(0xFF9E1B22);
+  static const Color primaryDeep = Color(0xFF6E0E14);
+  static const Color primarySoft = Color(0xFFFDF2F2);
+  static const Color accentGold = Color(0xFFC68A1E);
 
-  static const Color bgLight = Color(0xFFF6F6F7);
+  static const Color bgLight = Color(0xFFF8F8F9);
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0xFFE4E4E7);
-  static const Color textPrimaryLight = Color(0xFF18181B);
-  static const Color textSecondaryLight = Color(0xFF52525B);
+  static const Color borderLight = Color(0xFFEAEAEF);
+  static const Color textPrimaryLight = Color(0xFF111315);
+  static const Color textSecondaryLight = Color(0xFF6B7280);
 
-  static const Color bgDark = Color(0xFF111113);
-  static const Color surfaceDark = Color(0xFF1C1C20);
-  static const Color borderDark = Color(0xFF2D2D33);
-  static const Color textPrimaryDark = Color(0xFFF4F4F5);
-  static const Color textSecondaryDark = Color(0xFFA1A1AA);
+  static const Color bgDark = Color(0xFF0E0F11);
+  static const Color surfaceDark = Color(0xFF17191C);
+  static const Color borderDark = Color(0xFF26292E);
+  static const Color textPrimaryDark = Color(0xFFF4F5F7);
+  static const Color textSecondaryDark = Color(0xFF9CA3AF);
 
-  // Warna badge status sesuai PRD Bab 5 (Menunggu = oranye, Ditolak = merah, Disetujui/Terdaftar = hijau)
   static const Color statusPendingText = Color(0xFFB45309);
   static const Color statusPendingBg = Color(0xFFFEF3C7);
 
@@ -30,22 +28,18 @@ class AppTheme {
   static const Color statusApprovedText = Color(0xFF15803D);
   static const Color statusApprovedBg = Color(0xFFDCFCE7);
 
-  static List<BoxShadow> softShadow(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    if (isDark) return const [];
-    return [
-      BoxShadow(
-        color: const Color(0xFF18181B).withValues(alpha: 0.05),
-        blurRadius: 18,
-        offset: const Offset(0, 6),
-      ),
-    ];
-  }
-
   static ThemeData get lightTheme {
-    final base = ThemeData(
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.light().textTheme,
+    ).apply(
+      bodyColor: textPrimaryLight,
+      displayColor: textPrimaryLight,
+    );
+
+    return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      textTheme: textTheme,
       colorScheme: const ColorScheme.light(
         primary: primary,
         onPrimary: Colors.white,
@@ -57,20 +51,17 @@ class AppTheme {
         outline: borderLight,
       ),
       scaffoldBackgroundColor: bgLight,
-    );
-
-    return base.copyWith(
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: bgLight,
         foregroundColor: textPrimaryLight,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           color: textPrimaryLight,
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
         ),
       ),
@@ -89,27 +80,27 @@ class AppTheme {
           elevation: 0,
           backgroundColor: primary,
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w700,
-            letterSpacing: 0.1,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
-          foregroundColor: primary,
-          side: const BorderSide(color: primary, width: 1.4),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
+          foregroundColor: textPrimaryLight,
+          side: const BorderSide(color: borderLight, width: 1.2),
+          backgroundColor: surfaceLight,
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
@@ -117,49 +108,51 @@ class AppTheme {
         filled: true,
         fillColor: surfaceLight,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        labelStyle: const TextStyle(color: textSecondaryLight, fontSize: 14),
-        hintStyle: const TextStyle(color: Color(0xFFA1A1AA), fontSize: 14),
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: textSecondaryLight,
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          color: const Color(0xFF9CA3AF),
+          fontSize: 14,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: primary, width: 1.8),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: primary, width: 1.6),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: statusRejectedText),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 68,
+        height: 64,
         backgroundColor: surfaceLight,
         elevation: 0,
         indicatorColor: primarySoft,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: primary,
-            );
-          }
-          return const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: textSecondaryLight,
+          final selected = states.contains(WidgetState.selected);
+          return GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? primary : textSecondaryLight,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: primary, size: 24);
-          }
-          return const IconThemeData(color: textSecondaryLight, size: 23);
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? primary : textSecondaryLight,
+            size: 22,
+          );
         }),
       ),
       dividerTheme: const DividerThemeData(
@@ -171,12 +164,20 @@ class AppTheme {
   }
 
   static ThemeData get darkTheme {
-    final base = ThemeData(
+    final textTheme = GoogleFonts.plusJakartaSansTextTheme(
+      ThemeData.dark().textTheme,
+    ).apply(
+      bodyColor: textPrimaryDark,
+      displayColor: textPrimaryDark,
+    );
+
+    return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
+      textTheme: textTheme,
       colorScheme: const ColorScheme.dark(
         primary: Color(0xFFEF5350),
-        onPrimary: Color(0xFF2B0608),
+        onPrimary: Colors.white,
         secondary: Color(0xFFFBBF24),
         onSecondary: Color(0xFF2E1A00),
         surface: surfaceDark,
@@ -185,20 +186,17 @@ class AppTheme {
         outline: borderDark,
       ),
       scaffoldBackgroundColor: bgDark,
-    );
-
-    return base.copyWith(
-      appBarTheme: const AppBarTheme(
+      appBarTheme: AppBarTheme(
         centerTitle: false,
         elevation: 0,
         scrolledUnderElevation: 0,
         backgroundColor: bgDark,
         foregroundColor: textPrimaryDark,
         surfaceTintColor: Colors.transparent,
-        titleTextStyle: TextStyle(
+        titleTextStyle: GoogleFonts.plusJakartaSans(
           color: textPrimaryDark,
-          fontSize: 19,
-          fontWeight: FontWeight.w800,
+          fontSize: 18,
+          fontWeight: FontWeight.w700,
           letterSpacing: -0.4,
         ),
       ),
@@ -217,26 +215,27 @@ class AppTheme {
           elevation: 0,
           backgroundColor: const Color(0xFFD32F2F),
           foregroundColor: Colors.white,
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w700,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
         style: OutlinedButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
-          foregroundColor: const Color(0xFFEF5350),
-          side: const BorderSide(color: Color(0xFFEF5350), width: 1.4),
-          textStyle: const TextStyle(
-            fontSize: 15,
-            fontWeight: FontWeight.w700,
+          foregroundColor: textPrimaryDark,
+          side: const BorderSide(color: borderDark, width: 1.2),
+          backgroundColor: surfaceDark,
+          textStyle: GoogleFonts.plusJakartaSans(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(12),
           ),
         ),
       ),
@@ -244,45 +243,46 @@ class AppTheme {
         filled: true,
         fillColor: surfaceDark,
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-        labelStyle: const TextStyle(color: textSecondaryDark, fontSize: 14),
-        hintStyle: const TextStyle(color: Color(0xFF71717A), fontSize: 14),
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: textSecondaryDark,
+          fontSize: 14,
+        ),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          color: const Color(0xFF6B7280),
+          fontSize: 14,
+        ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderDark),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: borderDark),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
-          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 1.8),
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFEF5350), width: 1.6),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
-        height: 68,
+        height: 64,
         backgroundColor: surfaceDark,
         elevation: 0,
         indicatorColor: const Color(0xFFEF5350).withValues(alpha: 0.16),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFFEF5350),
-            );
-          }
-          return const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-            color: textSecondaryDark,
+          final selected = states.contains(WidgetState.selected);
+          return GoogleFonts.plusJakartaSans(
+            fontSize: 11,
+            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+            color: selected ? const Color(0xFFEF5350) : textSecondaryDark,
           );
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          if (states.contains(WidgetState.selected)) {
-            return const IconThemeData(color: Color(0xFFEF5350), size: 24);
-          }
-          return const IconThemeData(color: textSecondaryDark, size: 23);
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? const Color(0xFFEF5350) : textSecondaryDark,
+            size: 22,
+          );
         }),
       ),
       dividerTheme: const DividerThemeData(

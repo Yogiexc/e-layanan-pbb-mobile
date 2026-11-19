@@ -158,7 +158,6 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                           border: Border.all(
                             color: Theme.of(context).colorScheme.outline,
                           ),
-                          boxShadow: AppTheme.softShadow(context),
                         ),
                         child: InkWell(
                           onTap: () => context.push('/nop/detail', extra: item),

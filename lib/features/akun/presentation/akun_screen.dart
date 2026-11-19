@@ -260,7 +260,6 @@ class AkunScreen extends ConsumerWidget {
               color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: Theme.of(context).colorScheme.outline),
-              boxShadow: AppTheme.softShadow(context),
             ),
             child: Column(
               children: [

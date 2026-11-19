@@ -37,104 +37,94 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
 
     return Scaffold(
-      body: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.fromLTRB(
-              24,
-              MediaQuery.of(context).padding.top + 36,
-              24,
-              32,
-            ),
-            decoration: const BoxDecoration(
-              color: AppTheme.primary,
-              borderRadius: BorderRadius.vertical(
-                bottom: Radius.circular(28),
-              ),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.14),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const Icon(
-                    Icons.account_balance_rounded,
-                    color: Colors.white,
-                    size: 28,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                const Text(
-                  'E-Layanan PBB P2',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 26,
-                    fontWeight: FontWeight.w800,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  'Pemerintah Kota Surakarta',
-                  style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.8),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
+      backgroundColor: isDark ? AppTheme.bgDark : Colors.white,
+      body: SafeArea(
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 440),
             child: SingleChildScrollView(
-              padding: const EdgeInsets.fromLTRB(24, 28, 24, 24),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
               child: Form(
                 key: _formKey,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
-                    Text(
-                      'Masuk ke Akun Wajib Pajak',
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w800,
-                            letterSpacing: -0.3,
+                    Row(
+                      children: [
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primary,
+                            borderRadius: BorderRadius.circular(11),
                           ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Kelola objek pajak dan ajukan layanan PBB langsung dari ponsel.',
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: isDark
-                                ? AppTheme.textSecondaryDark
-                                : AppTheme.textSecondaryLight,
+                          child: const Icon(
+                            Icons.account_balance_rounded,
+                            color: Colors.white,
+                            size: 22,
                           ),
+                        ),
+                        const SizedBox(width: 12),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              'E-Layanan PBB P2',
+                              style: TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w800,
+                                letterSpacing: -0.3,
+                              ),
+                            ),
+                            Text(
+                              'Bapenda Kota Surakarta',
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: secondaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 44),
+                    const Text(
+                      'Masuk ke akun Anda',
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: -0.8,
+                        height: 1.15,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      'Gunakan akun Wajib Pajak terdaftar untuk mengelola NOP dan mengajukan layanan PBB.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: secondaryColor,
+                        height: 1.5,
+                      ),
+                    ),
+                    const SizedBox(height: 32),
                     if (authState.errorMessage != null) ...[
                       Container(
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
                           color: AppTheme.statusRejectedBg,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: AppTheme.statusRejectedText
-                                .withValues(alpha: 0.4),
-                          ),
                         ),
                         child: Row(
                           children: [
                             const Icon(
                               Icons.error_outline_rounded,
                               color: AppTheme.statusRejectedText,
-                              size: 20,
+                              size: 18,
                             ),
                             const SizedBox(width: 10),
                             Expanded(
@@ -150,13 +140,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 18),
+                      const SizedBox(height: 20),
                     ],
+                    Text(
+                      'Username',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppTheme.textPrimaryDark
+                            : AppTheme.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _usernameController,
                       decoration: InputDecoration(
-                        labelText: 'Username',
-                        prefixIcon: const Icon(Icons.person_outline_rounded),
+                        hintText: 'Masukkan username',
                         errorText:
                             authState.validationErrors?['username']?.first,
                       ),
@@ -164,13 +164,23 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? 'Username wajib diisi'
                           : null,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 18),
+                    Text(
+                      'Password',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: isDark
+                            ? AppTheme.textPrimaryDark
+                            : AppTheme.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
                     TextFormField(
                       controller: _passwordController,
                       obscureText: _obscurePassword,
                       decoration: InputDecoration(
-                        labelText: 'Password',
-                        prefixIcon: const Icon(Icons.lock_outline_rounded),
+                        hintText: 'Masukkan password',
                         errorText:
                             authState.validationErrors?['password']?.first,
                         suffixIcon: IconButton(
@@ -181,6 +191,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             _obscurePassword
                                 ? Icons.visibility_outlined
                                 : Icons.visibility_off_outlined,
+                            size: 20,
                           ),
                           onPressed: () {
                             setState(
@@ -193,13 +204,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ? 'Password wajib diisi'
                           : null,
                     ),
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     ElevatedButton(
                       onPressed: authState.isLoading ? null : _handleLogin,
                       child: authState.isLoading
                           ? const SizedBox(
-                              width: 22,
-                              height: 22,
+                              width: 20,
+                              height: 20,
                               child: CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 2.2,
@@ -217,27 +228,26 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     .read(authProvider.notifier)
                                     .login('budi01', 'rahasia123');
                               },
-                        icon: const Icon(Icons.bolt_rounded),
-                        label: const Text('Masuk Cepat (Mode Mockup)'),
+                        icon: const Icon(Icons.bolt_rounded, size: 18),
+                        label: const Text('Masuk Cepat (Mode Demo)'),
                       ),
                     ],
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 28),
                     Text(
-                      'Belum memiliki akun? Pendaftaran Wajib Pajak dilakukan melalui portal website resmi E-Layanan PBB Kota Surakarta.',
+                      'Pendaftaran akun baru dilakukan melalui portal resmi Bapenda Kota Surakarta.',
                       textAlign: TextAlign.center,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: isDark
-                                ? AppTheme.textSecondaryDark
-                                : AppTheme.textSecondaryLight,
-                            height: 1.5,
-                          ),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: secondaryColor,
+                        height: 1.5,
+                      ),
                     ),
                   ],
                 ),
               ),
             ),
           ),
-        ],
+        ),
       ),
     );
   }

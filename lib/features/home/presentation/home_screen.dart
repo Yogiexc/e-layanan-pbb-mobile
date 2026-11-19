@@ -14,445 +14,447 @@ class HomeScreen extends ConsumerWidget {
     final user = ref.watch(authProvider).user;
     final nopAsync = ref.watch(nopListProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
 
-    final totalNop = nopAsync.maybeWhen(
-      data: (list) => list.length,
-      orElse: () => 0,
-    );
-    final pendingCount = nopAsync.maybeWhen(
-      data: (list) => list.where((e) => e.status == 'menunggu').length,
-      orElse: () => 0,
-    );
-    final rejectedCount = nopAsync.maybeWhen(
-      data: (list) => list.where((e) => e.status == 'ditolak').length,
-      orElse: () => 0,
-    );
-    final recentItems = nopAsync.maybeWhen(
-      data: (list) => list.take(2).toList(),
-      orElse: () => [],
-    );
+    final allItems = nopAsync.maybeWhen(data: (l) => l, orElse: () => []);
+    final totalNop = allItems.length;
+    final pendingCount = allItems.where((e) => e.status == 'menunggu').length;
+    final rejectedCount = allItems.where((e) => e.status == 'ditolak').length;
+    final recentItems = allItems.take(3).toList();
+
+    final initials = (user?.name.isNotEmpty == true ? user!.name : 'WP')
+        .trim()
+        .split(' ')
+        .take(2)
+        .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
+        .join();
 
     return Scaffold(
-      body: RefreshIndicator(
-        onRefresh: () async => ref.invalidate(nopListProvider),
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Container(
-                padding: EdgeInsets.fromLTRB(
-                  20,
-                  MediaQuery.of(context).padding.top + 18,
-                  20,
-                  26,
-                ),
-                decoration: const BoxDecoration(
-                  color: AppTheme.primary,
-                  borderRadius: BorderRadius.vertical(
-                    bottom: Radius.circular(28),
+      body: SafeArea(
+        child: RefreshIndicator(
+          onRefresh: () async => ref.invalidate(nopListProvider),
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(20, 16, 20, 28),
+            children: [
+              // Clean minimal top bar (no giant colored block)
+              Row(
+                children: [
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: AppTheme.primary,
+                    child: Text(
+                      initials,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                   ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Container(
-                          width: 44,
-                          height: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.16),
-                            borderRadius: BorderRadius.circular(14),
-                          ),
-                          child: const Icon(
-                            Icons.person_rounded,
-                            color: Colors.white,
-                            size: 24,
+                        Text(
+                          'Halo, ${user?.name.split(' ').first ?? "Wajib Pajak"}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            letterSpacing: -0.3,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Selamat datang,',
-                                style: TextStyle(
-                                  color: Colors.white.withValues(alpha: 0.78),
-                                  fontSize: 12,
-                                ),
-                              ),
-                              Text(
-                                user?.name.isNotEmpty == true
-                                    ? user!.name
-                                    : 'Wajib Pajak',
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.w800,
-                                  letterSpacing: -0.3,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 10,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.14),
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          child: const Text(
-                            'Kota Solo',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 12,
-                              fontWeight: FontWeight.w700,
-                            ),
+                        Text(
+                          'PBB P2 Kota Surakarta',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: secondaryColor,
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
-                    const SizedBox(height: 22),
-                    Container(
-                      padding: const EdgeInsets.all(18),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryDeep,
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: Colors.white.withValues(alpha: 0.1),
-                        ),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: _HeaderStat(
-                              label: 'Total Objek',
-                              value: '$totalNop',
-                            ),
-                          ),
-                          Container(
-                            width: 1,
-                            height: 34,
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          Expanded(
-                            child: _HeaderStat(
-                              label: 'Menunggu',
-                              value: '$pendingCount',
-                            ),
-                          ),
-                          Container(
-                            width: 1,
-                            height: 34,
-                            color: Colors.white.withValues(alpha: 0.15),
-                          ),
-                          Expanded(
-                            child: _HeaderStat(
-                              label: 'Perlu Revisi',
-                              value: '$rejectedCount',
-                              highlight: rejectedCount > 0,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  IconButton(
+                    tooltip: 'Akun',
+                    onPressed: () => context.go('/akun'),
+                    icon: const Icon(Icons.settings_outlined, size: 22),
+                  ),
+                ],
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 28),
-              sliver: SliverList(
-                delegate: SliverChildListDelegate([
-                  Text(
-                    'Layanan Utama',
-                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          letterSpacing: -0.3,
-                        ),
+              const SizedBox(height: 20),
+
+              // Priority Bank-style Summary Card with subtle geometric pattern
+              ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Container(
+                  decoration: const BoxDecoration(
+                    color: AppTheme.primary,
                   ),
-                  const SizedBox(height: 12),
-                  Row(
+                  child: Stack(
                     children: [
-                      Expanded(
-                        child: _BankingServiceCard(
-                          title: 'Objek Baru',
-                          subtitle: 'Daftar SPOP objek pajak baru',
-                          icon: Icons.add_home_work_rounded,
-                          accentColor: AppTheme.primary,
-                          onTap: () => context.push('/pengajuan/objek-baru'),
-                        ),
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: _BankingServiceCard(
-                          title: 'Mutasi PBB',
-                          subtitle: 'Penuh, pemecahan, & gabung',
-                          icon: Icons.swap_horiz_rounded,
-                          accentColor: AppTheme.accentGold,
-                          onTap: () => context.push('/pengajuan/pilih-mutasi'),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        'Aktivitas Objek Pajak',
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: -0.3,
-                            ),
-                      ),
-                      TextButton(
-                        onPressed: () => context.go('/nop'),
-                        child: const Text(
-                          'Lihat Semua',
-                          style: TextStyle(fontWeight: FontWeight.w700),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  if (recentItems.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.surface,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(
-                          color: Theme.of(context).colorScheme.outline,
-                        ),
-                      ),
-                      child: const Text(
-                        'Belum ada objek pajak terdaftar pada akun ini.',
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  else
-                    ...recentItems.map(
-                      (item) => Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                      Positioned(
+                        right: -36,
+                        top: -36,
                         child: Container(
+                          width: 140,
+                          height: 140,
                           decoration: BoxDecoration(
-                            color: Theme.of(context).colorScheme.surface,
-                            borderRadius: BorderRadius.circular(16),
+                            shape: BoxShape.circle,
                             border: Border.all(
-                              color: Theme.of(context).colorScheme.outline,
+                              color: Colors.white.withValues(alpha: 0.08),
+                              width: 24,
                             ),
-                            boxShadow: AppTheme.softShadow(context),
                           ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () =>
-                                context.push('/nop/detail', extra: item),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 44,
-                                    height: 44,
-                                    decoration: BoxDecoration(
-                                      color: isDark
-                                          ? Colors.white.withValues(alpha: 0.06)
-                                          : AppTheme.primarySoft,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                    child: Icon(
-                                      Icons.home_work_outlined,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .primary,
+                        ),
+                      ),
+                      Positioned(
+                        right: 24,
+                        bottom: -48,
+                        child: Container(
+                          width: 110,
+                          height: 110,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.white.withValues(alpha: 0.05),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  'OBJEK PAJAK TERDAFTAR',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.72),
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w700,
+                                    letterSpacing: 0.8,
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 8,
+                                    vertical: 3,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.14),
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: const Text(
+                                    'Bapenda Solo',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w600,
                                     ),
                                   ),
-                                  const SizedBox(width: 14),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.baseline,
+                              textBaseline: TextBaseline.alphabetic,
+                              children: [
+                                Text(
+                                  '$totalNop',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 38,
+                                    fontWeight: FontWeight.w800,
+                                    letterSpacing: -1.2,
+                                    height: 1,
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'NOP aktif & diajukan',
+                                  style: TextStyle(
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 20),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 14,
+                                vertical: 10,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppTheme.primaryDeep
+                                    .withValues(alpha: 0.7),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: Row(
+                                children: [
                                   Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                    child: Row(
                                       children: [
-                                        Text(
-                                          item.nop ?? 'NOP belum terbit',
-                                          style: const TextStyle(
-                                            fontWeight: FontWeight.w700,
-                                            fontSize: 14,
-                                          ),
+                                        const Icon(
+                                          Icons.schedule_rounded,
+                                          size: 16,
+                                          color: Color(0xFFFBBF24),
                                         ),
-                                        const SizedBox(height: 3),
+                                        const SizedBox(width: 6),
                                         Text(
-                                          item.alamat,
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .bodySmall,
+                                          '$pendingCount Menunggu',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
                                         ),
                                       ],
                                     ),
                                   ),
-                                  const SizedBox(width: 8),
-                                  StatusBadge(status: item.status),
+                                  Container(
+                                    width: 1,
+                                    height: 16,
+                                    color: Colors.white.withValues(alpha: 0.16),
+                                  ),
+                                  const SizedBox(width: 14),
+                                  Expanded(
+                                    child: Row(
+                                      children: [
+                                        Icon(
+                                          Icons.error_outline_rounded,
+                                          size: 16,
+                                          color: rejectedCount > 0
+                                              ? const Color(0xFFFCA5A5)
+                                              : Colors.white
+                                                  .withValues(alpha: 0.6),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          '$rejectedCount Perlu Revisi',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ],
                               ),
                             ),
-                          ),
+                          ],
                         ),
                       ),
-                    ),
-                  const SizedBox(height: 16),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? AppTheme.surfaceDark
-                          : AppTheme.primarySoft.withValues(alpha: 0.65),
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: isDark
-                            ? AppTheme.borderDark
-                            : AppTheme.primary.withValues(alpha: 0.16),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(
-                          Icons.verified_user_outlined,
-                          color: Theme.of(context).colorScheme.primary,
-                          size: 22,
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Wilayah Layanan PBB P2 Kota Surakarta',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w700,
-                                  fontSize: 13,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                'Mencakup Kec. Laweyan, Serengan, Pasar Kliwon, Jebres, dan Banjarsari.',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 24),
+
+              // Quick Action Strip (compact banking style)
+              const Text(
+                'Layanan Pengajuan',
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w800,
+                  letterSpacing: -0.3,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _QuickServiceTile(
+                      icon: Icons.add_home_work_rounded,
+                      title: 'Objek Baru',
+                      subtitle: 'Formulir SPOP',
+                      onTap: () => context.push('/pengajuan/objek-baru'),
                     ),
                   ),
-                ]),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _QuickServiceTile(
+                      icon: Icons.swap_horiz_rounded,
+                      title: 'Mutasi PBB',
+                      subtitle: 'Penuh / Pecah / Gabung',
+                      onTap: () => context.push('/pengajuan/pilih-mutasi'),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 28),
+
+              // Transaction-style recent list (single clean container with dividers)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Objek Pajak Terbaru',
+                    style: TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.3,
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () => context.go('/nop'),
+                    child: Text(
+                      'Lihat semua',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w700,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Container(
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surface,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Theme.of(context).colorScheme.outline,
+                  ),
+                ),
+                child: recentItems.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Text(
+                          'Belum ada objek pajak terdaftar.',
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                    : Column(
+                        children: recentItems.asMap().entries.map((entry) {
+                          final idx = entry.key;
+                          final item = entry.value;
+                          final isLast = idx == recentItems.length - 1;
+                          return Column(
+                            children: [
+                              InkWell(
+                                borderRadius: BorderRadius.vertical(
+                                  top: idx == 0
+                                      ? const Radius.circular(16)
+                                      : Radius.zero,
+                                  bottom: isLast
+                                      ? const Radius.circular(16)
+                                      : Radius.zero,
+                                ),
+                                onTap: () =>
+                                    context.push('/nop/detail', extra: item),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 14,
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              item.nop ?? 'NOP belum terbit',
+                                              style: const TextStyle(
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w700,
+                                                letterSpacing: -0.2,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 3),
+                                            Text(
+                                              '${item.alamat} · ${item.luasTanah.toStringAsFixed(0)} m²',
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                color: secondaryColor,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                      const SizedBox(width: 10),
+                                      StatusBadge(status: item.status),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              if (!isLast) const Divider(indent: 16, endIndent: 16),
+                            ],
+                          );
+                        }).toList(),
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _HeaderStat extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool highlight;
-
-  const _HeaderStat({
-    required this.label,
-    required this.value,
-    this.highlight = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            color: highlight ? const Color(0xFFFBBF24) : Colors.white,
-            fontSize: 22,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          label,
-          style: TextStyle(
-            color: Colors.white.withValues(alpha: 0.78),
-            fontSize: 11,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BankingServiceCard extends StatelessWidget {
+class _QuickServiceTile extends StatelessWidget {
+  final IconData icon;
   final String title;
   final String subtitle;
-  final IconData icon;
-  final Color accentColor;
   final VoidCallback onTap;
 
-  const _BankingServiceCard({
+  const _QuickServiceTile({
+    required this.icon,
     required this.title,
     required this.subtitle,
-    required this.icon,
-    required this.accentColor,
     required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final secondaryColor =
+        isDark ? AppTheme.textSecondaryDark : AppTheme.textSecondaryLight;
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Theme.of(context).colorScheme.outline),
-        boxShadow: AppTheme.softShadow(context),
       ),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(16),
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(16),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: accentColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(14),
-                ),
-                child: Icon(icon, color: accentColor, size: 26),
+              Icon(
+                icon,
+                color: Theme.of(context).colorScheme.primary,
+                size: 24,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               Text(
                 title,
                 style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
                   letterSpacing: -0.2,
                 ),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      height: 1.35,
-                    ),
+                style: TextStyle(fontSize: 12, color: secondaryColor),
               ),
             ],
           ),
