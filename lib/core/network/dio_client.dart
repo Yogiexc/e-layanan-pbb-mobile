@@ -28,8 +28,8 @@ final dioProvider = Provider<Dio>((ref) {
       },
       onError: (DioException e, handler) async {
         if (e.response?.statusCode == 401) {
-          // Token expired atau tidak valid -> Hapus token sesuai ketentuan PRD
-          await tokenStorage.clearToken();
+          // Token expired atau tidak valid -> Hapus token dan picu signal kembali ke login
+          await tokenStorage.handleUnauthorized();
         }
         return handler.next(e);
       },

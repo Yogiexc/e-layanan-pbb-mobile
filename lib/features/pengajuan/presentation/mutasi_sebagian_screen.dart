@@ -19,7 +19,8 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
   final _keteranganController = TextEditingController();
 
   String? _selectedNop;
-  NopItemModel? _selectedItem;
+  NopDetailModel? _nopDetail;
+  bool _loadingNopDetail = false;
   bool _isSubmitting = false;
 
   @override
@@ -27,6 +28,23 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
     _jumlahBidangController.dispose();
     _keteranganController.dispose();
     super.dispose();
+  }
+
+  Future<void> _onNopChanged(String? val) async {
+    setState(() {
+      _selectedNop = val;
+      _nopDetail = null;
+    });
+
+    if (val != null && val.isNotEmpty) {
+      setState(() => _loadingNopDetail = true);
+      final res = await ref.read(nopRepositoryProvider).getNopDetail(val);
+      if (!mounted) return;
+      setState(() {
+        _loadingNopDetail = false;
+        _nopDetail = res.data;
+      });
+    }
   }
 
   Future<void> _submit() async {
@@ -49,6 +67,7 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
     setState(() => _isSubmitting = false);
 
     if (res.success) {
+      ref.invalidate(nopListProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(res.message ?? 'Pengajuan berhasil dikirim.'),
@@ -64,6 +83,30 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
         ),
       );
     }
+  }
+
+  Widget _buildDetailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 120,
+            child: Text(
+              label,
+              style: const TextStyle(fontSize: 12, color: Colors.black54),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -113,6 +156,7 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     DropdownButtonFormField<String>(
+                      key: ValueKey(_selectedNop),
                       initialValue: _selectedNop,
                       decoration: const InputDecoration(labelText: 'NOP Induk *'),
                       items: validItems
@@ -123,33 +167,42 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
                             ),
                           )
                           .toList(),
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedNop = val;
-                          _selectedItem = validItems
-                              .where((e) => e.nop == val)
-                              .firstOrNull;
-                        });
-                      },
+                      onChanged: _onNopChanged,
                       validator: (v) => v == null ? 'Pilih NOP Induk' : null,
                     ),
-                    if (_selectedItem != null) ...[
+                    if (_loadingNopDetail)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Center(child: CircularProgressIndicator()),
+                      ),
+                    if (_nopDetail != null) ...[
                       const SizedBox(height: 12),
                       Card(
                         child: Padding(
-                          padding: const EdgeInsets.all(12),
+                          padding: const EdgeInsets.all(14),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Data NOP Induk',
-                                style: TextStyle(fontWeight: FontWeight.w700),
+                              Row(
+                                children: [
+                                  const Icon(Icons.info_outline, size: 18, color: Color(0xFF9E1B22)),
+                                  const SizedBox(width: 8),
+                                  const Text(
+                                    'Data NOP Induk Terdaftar',
+                                    style: TextStyle(fontWeight: FontWeight.w700),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(height: 6),
-                              Text('Alamat: ${_selectedItem!.alamat}'),
-                              Text(
-                                'Luas Tanah: ${_selectedItem!.luasTanah.toStringAsFixed(0)} m²',
-                              ),
+                              const Divider(height: 16),
+                              _buildDetailRow('Wajib Pajak', _nopDetail!.namaSubjek),
+                              _buildDetailRow('Alamat Objek', '${_nopDetail!.opNamaJalan}, RT ${_nopDetail!.opRt} / RW ${_nopDetail!.opRw}'),
+                              _buildDetailRow('Kelurahan', _nopDetail!.opKelurahanNama),
+                              _buildDetailRow('Kecamatan', _nopDetail!.opKecamatanNama),
+                              _buildDetailRow('Luas Tanah', '${_nopDetail!.luasTanah.toStringAsFixed(0)} m²'),
+                              _buildDetailRow('Luas Bangunan', '${_nopDetail!.luasBangunan.toStringAsFixed(0)} m²'),
+                              _buildDetailRow('Jenis Tanah', _nopDetail!.jenisTanah),
+                              _buildDetailRow('Kode ZNT', _nopDetail!.kodeZnt),
+                              _buildDetailRow('No. Sertifikat', _nopDetail!.noSertifikat.isEmpty ? '-' : _nopDetail!.noSertifikat),
                             ],
                           ),
                         ),

@@ -59,6 +59,8 @@ class _NopDetailScreenState extends ConsumerState<NopDetailScreen> {
 
     if (jenis == 'mutasi_penuh') {
       context.push('/pengajuan/mutasi-penuh', extra: extra);
+    } else if (jenis == 'mutasi_penggabungan') {
+      context.push('/pengajuan/mutasi-penggabungan', extra: extra);
     } else {
       context.push('/pengajuan/objek-baru', extra: extra);
     }

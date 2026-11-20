@@ -1,4 +1,6 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/network/token_storage.dart';
 import '../data/auth_repository.dart';
 import '../data/user_model.dart';
 
@@ -43,13 +45,37 @@ final authProvider =
 
 class AuthNotifier extends Notifier<AuthState> {
   late AuthRepository _repository;
+  late VoidCallback _unauthorizedListener;
 
   @override
   AuthState build() {
     _repository = ref.watch(authRepositoryProvider);
+    final tokenStorage = ref.watch(tokenStorageProvider);
+
+    _unauthorizedListener = () {
+      state = AuthState(status: AuthStatus.unauthenticated);
+    };
+    tokenStorage.unauthorizedSignal.addListener(_unauthorizedListener);
+    ref.onDispose(() {
+      tokenStorage.unauthorizedSignal.removeListener(_unauthorizedListener);
+    });
+
     // Jalankan pengecekan auth awal secara asynchronous
     Future.microtask(() => checkAuth());
     return AuthState(status: AuthStatus.initial);
+  }
+
+  void updateUsernameLocal(String newUsername) {
+    if (state.user != null) {
+      final updated = UserModel(
+        id: state.user!.id,
+        name: state.user!.name,
+        username: newUsername,
+        nik: state.user!.nik,
+        npwp: state.user!.npwp,
+      );
+      state = state.copyWith(user: updated);
+    }
   }
 
   Future<void> checkAuth() async {

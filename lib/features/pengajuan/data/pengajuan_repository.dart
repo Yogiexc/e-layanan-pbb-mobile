@@ -3,17 +3,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_config.dart';
 import '../../../core/network/api_response.dart';
 import '../../../core/network/dio_client.dart';
+import '../../nop/data/nop_repository.dart';
 import 'pengajuan_models.dart';
 
 final pengajuanRepositoryProvider = Provider<PengajuanRepository>((ref) {
   final dio = ref.watch(dioProvider);
-  return PengajuanRepository(dio);
+  final nopRepo = ref.watch(nopRepositoryProvider);
+  return PengajuanRepository(dio, nopRepo);
 });
 
 class PengajuanRepository {
   final Dio _dio;
+  final NopRepository _nopRepository;
 
-  PengajuanRepository(this._dio);
+  PengajuanRepository(this._dio, this._nopRepository);
 
   Future<List<WilayahItem>> getKecamatan() async {
     if (AppConfig.useMockData) {
@@ -107,6 +110,36 @@ class PengajuanRepository {
   }) async {
     if (AppConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 700));
+
+      final berkasMap = <String, String>{};
+      berkas.forEach((k, v) => berkasMap[k] = v.fileName);
+
+      if (endpoint.contains('/revisi')) {
+        final uriParts = endpoint.split('/');
+        final idIdx = uriParts.indexOf('pengajuan') + 1;
+        final revId = int.tryParse(uriParts[idIdx]) ?? 28;
+        _nopRepository.updateMockRevision(
+          pengajuanId: revId,
+          formData: fields,
+          berkasUrls: berkasMap,
+        );
+      } else {
+        String jenis = 'objek_baru';
+        if (endpoint.contains('mutasi-penuh')) {
+          jenis = 'mutasi_penuh';
+        } else if (endpoint.contains('mutasi-penggabungan')) {
+          jenis = 'mutasi_penggabungan';
+        }
+        _nopRepository.addMockSubmission(
+          nop: fields['nop']?.toString(),
+          alamat: fields['op_nama_jalan']?.toString() ?? 'Surakarta',
+          luasTanah: double.tryParse(fields['luas_tanah']?.toString() ?? '') ?? 100.0,
+          jenis: jenis,
+          formData: fields,
+          berkasUrls: berkasMap,
+        );
+      }
+
       return ApiResponse<Map<String, dynamic>>(
         success: true,
         message: 'Pengajuan berhasil dikirim (Mode Mockup).',
@@ -149,6 +182,18 @@ class PengajuanRepository {
   }) async {
     if (AppConfig.useMockData) {
       await Future.delayed(const Duration(milliseconds: 600));
+      _nopRepository.addMockSubmission(
+        nop: nop,
+        alamat: 'Pemecahan $jumlahBidang bidang dari NOP $nop',
+        luasTanah: 200.0,
+        jenis: 'mutasi_sebagian',
+        formData: {
+          'nop': nop,
+          'jumlah_bidang': jumlahBidang,
+          'keterangan': keterangan,
+        },
+        berkasUrls: {},
+      );
       return ApiResponse<Map<String, dynamic>>(
         success: true,
         message: 'Pengajuan Mutasi Sebagian berhasil dikirim (Mode Mockup).',
@@ -185,7 +230,16 @@ class PengajuanRepository {
 
   Future<ApiResponse<PengajuanDetailModel>> getPengajuanDetail(int id) async {
     if (AppConfig.useMockData) {
-      await Future.delayed(const Duration(milliseconds: 400));
+      await Future.delayed(const Duration(milliseconds: 350));
+      final dynamicDetail = _nopRepository.getMockPengajuanDetail(id);
+      if (dynamicDetail != null) {
+        return ApiResponse<PengajuanDetailModel>(
+          success: true,
+          message: 'OK',
+          data: PengajuanDetailModel.fromJson(dynamicDetail),
+        );
+      }
+
       final isDitolak = id == 28;
       return ApiResponse<PengajuanDetailModel>(
         success: true,

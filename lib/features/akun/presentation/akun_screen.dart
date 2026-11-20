@@ -15,64 +15,78 @@ class AkunScreen extends ConsumerWidget {
       text: ref.read(authProvider).user?.username ?? '',
     );
     final formKey = GlobalKey<FormState>();
+    String? serverError;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Ubah Username'),
-        content: Form(
-          key: formKey,
-          child: TextFormField(
-            controller: controller,
-            decoration: const InputDecoration(
-              labelText: 'Username Baru',
-              hintText: '4-30 karakter (huruf, angka, titik, _)',
-            ),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Username wajib diisi';
-              if (!RegExp(r'^[a-zA-Z0-9._]{4,30}$').hasMatch(v.trim())) {
-                return '4-30 karakter: huruf, angka, titik, atau garis bawah';
-              }
-              return null;
-            },
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (!(formKey.currentState?.validate() ?? false)) return;
-              final newUsername = controller.text.trim();
-              if (!AppConfig.useMockData) {
-                try {
-                  await ref
-                      .read(dioProvider)
-                      .patch('/me/username', data: {'username': newUsername});
-                } catch (_) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('Gagal mengubah username.')),
-                    );
-                  }
-                  return;
-                }
-              }
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content:
-                        Text('Username berhasil diubah menjadi $newUsername.'),
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Ubah Username'),
+          content: Form(
+            key: formKey,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                TextFormField(
+                  controller: controller,
+                  decoration: InputDecoration(
+                    labelText: 'Username Baru',
+                    hintText: '4-30 karakter (huruf, angka, titik, _)',
+                    errorText: serverError,
                   ),
-                );
-              }
-            },
-            child: const Text('Simpan'),
+                  onChanged: (_) {
+                    if (serverError != null) {
+                      setDialogState(() => serverError = null);
+                    }
+                  },
+                  validator: (v) {
+                    if (v == null || v.trim().isEmpty) return 'Username wajib diisi';
+                    if (!RegExp(r'^[a-zA-Z0-9._]{4,30}$').hasMatch(v.trim())) {
+                      return '4-30 karakter: huruf, angka, titik, atau garis bawah';
+                    }
+                    return null;
+                  },
+                ),
+              ],
+            ),
           ),
-        ],
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (!(formKey.currentState?.validate() ?? false)) return;
+                final newUsername = controller.text.trim();
+                if (!AppConfig.useMockData) {
+                  try {
+                    await ref
+                        .read(dioProvider)
+                        .patch('/me/username', data: {'username': newUsername});
+                  } catch (e) {
+                    setDialogState(() {
+                      serverError = 'Username sudah digunakan atau tidak valid.';
+                    });
+                    return;
+                  }
+                }
+                ref.read(authProvider.notifier).updateUsernameLocal(newUsername);
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content:
+                          Text('Username berhasil diubah menjadi $newUsername.'),
+                    ),
+                  );
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -82,82 +96,105 @@ class AkunScreen extends ConsumerWidget {
     final newCtrl = TextEditingController();
     final confirmCtrl = TextEditingController();
     final formKey = GlobalKey<FormState>();
+    String? serverError;
 
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Ganti Password'),
-        content: Form(
-          key: formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  controller: oldCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(labelText: 'Password Lama'),
-                  validator: (v) =>
-                      (v == null || v.isEmpty) ? 'Wajib diisi' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: newCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Password Baru (min. 8 karakter)',
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          title: const Text('Ganti Password'),
+          content: Form(
+            key: formKey,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (serverError != null) ...[
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      margin: const EdgeInsets.only(bottom: 12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEE2E2),
+                        borderRadius: BorderRadius.circular(6),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline, size: 16, color: Color(0xFFB91C1C)),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              serverError!,
+                              style: const TextStyle(fontSize: 12, color: Color(0xFFB91C1C)),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  TextFormField(
+                    controller: oldCtrl,
+                    obscureText: true,
+                    decoration: const InputDecoration(labelText: 'Password Lama'),
+                    validator: (v) =>
+                        (v == null || v.isEmpty) ? 'Wajib diisi' : null,
                   ),
-                  validator: (v) =>
-                      (v == null || v.length < 8) ? 'Minimal 8 karakter' : null,
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: confirmCtrl,
-                  obscureText: true,
-                  decoration: const InputDecoration(
-                    labelText: 'Konfirmasi Password Baru',
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: newCtrl,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Password Baru (min. 8 karakter)',
+                    ),
+                    validator: (v) =>
+                        (v == null || v.length < 8) ? 'Minimal 8 karakter' : null,
                   ),
-                  validator: (v) =>
-                      v != newCtrl.text ? 'Konfirmasi password tidak cocok' : null,
-                ),
-              ],
+                  const SizedBox(height: 12),
+                  TextFormField(
+                    controller: confirmCtrl,
+                    obscureText: true,
+                    decoration: const InputDecoration(
+                      labelText: 'Konfirmasi Password Baru',
+                    ),
+                    validator: (v) =>
+                        v != newCtrl.text ? 'Konfirmasi password tidak cocok' : null,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            child: const Text('Batal'),
-          ),
-          TextButton(
-            onPressed: () async {
-              if (!(formKey.currentState?.validate() ?? false)) return;
-              if (!AppConfig.useMockData) {
-                try {
-                  await ref.read(dioProvider).put('/me/password', data: {
-                    'password_lama': oldCtrl.text,
-                    'password_baru': newCtrl.text,
-                    'password_baru_confirmation': confirmCtrl.text,
-                  });
-                } catch (_) {
-                  if (ctx.mounted) {
-                    ScaffoldMessenger.of(ctx).showSnackBar(
-                      const SnackBar(content: Text('Gagal mengganti password.')),
-                    );
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Batal'),
+            ),
+            TextButton(
+              onPressed: () async {
+                if (!(formKey.currentState?.validate() ?? false)) return;
+                if (!AppConfig.useMockData) {
+                  try {
+                    await ref.read(dioProvider).put('/me/password', data: {
+                      'password_lama': oldCtrl.text,
+                      'password_baru': newCtrl.text,
+                      'password_baru_confirmation': confirmCtrl.text,
+                    });
+                  } catch (e) {
+                    setDialogState(() {
+                      serverError = 'Password lama salah atau terjadi kesalahan.';
+                    });
+                    return;
                   }
-                  return;
                 }
-              }
-              if (ctx.mounted) {
-                Navigator.pop(ctx);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Password berhasil diperbarui.')),
-                );
-              }
-            },
-            child: const Text('Simpan'),
-          ),
-        ],
+                if (ctx.mounted) {
+                  Navigator.pop(ctx);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Password berhasil diperbarui.')),
+                  );
+                }
+              },
+              child: const Text('Simpan'),
+            ),
+          ],
+        ),
       ),
     );
   }

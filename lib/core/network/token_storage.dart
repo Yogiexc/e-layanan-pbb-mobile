@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../utils/constants.dart';
@@ -8,6 +9,7 @@ final secureStorageProvider = Provider<FlutterSecureStorage>((ref) {
 
 class TokenStorage {
   final FlutterSecureStorage _storage;
+  final ValueNotifier<int> unauthorizedSignal = ValueNotifier<int>(0);
 
   TokenStorage(this._storage);
 
@@ -21,6 +23,11 @@ class TokenStorage {
 
   Future<void> clearToken() async {
     await _storage.delete(key: AppConstants.keyAuthToken);
+  }
+
+  Future<void> handleUnauthorized() async {
+    await clearToken();
+    unauthorizedSignal.value++;
   }
 }
 

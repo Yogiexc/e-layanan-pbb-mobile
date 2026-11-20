@@ -5,6 +5,7 @@ import '../../../../core/utils/validators.dart';
 import '../../data/pengajuan_models.dart';
 import '../../data/pengajuan_repository.dart';
 import 'berkas_upload_section.dart';
+import '../../../nop/data/nop_repository.dart';
 
 class SpopFormControllers {
   final nopBersama = TextEditingController();
@@ -142,6 +143,37 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
     _loadInitial();
   }
 
+  @override
+  void didUpdateWidget(covariant SpopFormScaffold oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.initialData != null && widget.initialData != oldWidget.initialData) {
+      _applyInitialData(widget.initialData!);
+    }
+  }
+
+  void _applyInitialData(Map<String, dynamic> d) {
+    _c.populateFromMap(d);
+    _selectedStatusSubjek =
+        d['status_subjek']?.toString() ?? _selectedStatusSubjek;
+    _selectedPekerjaan = d['pekerjaan']?.toString() ?? _selectedPekerjaan;
+    _selectedJenisTanah =
+        d['jenis_tanah']?.toString() ?? _selectedJenisTanah;
+    _geometryGeoJson = d['geometry']?.toString() ?? _geometryGeoJson;
+
+    final kecId = d['op_kecamatan_id']?.toString();
+    if (kecId != null && kecId.isNotEmpty) {
+      _selectedKecamatanId = kecId;
+      ref.read(pengajuanRepositoryProvider).getKelurahan(kecId).then((kel) {
+        if (mounted) {
+          setState(() {
+            _kelurahanList = kel;
+            _selectedKelurahanId = d['op_kelurahan_id']?.toString();
+          });
+        }
+      });
+    }
+  }
+
   Future<void> _loadInitial() async {
     final repo = ref.read(pengajuanRepositoryProvider);
     final kec = await repo.getKecamatan();
@@ -149,26 +181,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
     setState(() => _kecamatanList = kec);
 
     if (widget.initialData != null) {
-      final d = widget.initialData!;
-      _c.populateFromMap(d);
-      _selectedStatusSubjek =
-          d['status_subjek']?.toString() ?? _selectedStatusSubjek;
-      _selectedPekerjaan = d['pekerjaan']?.toString() ?? _selectedPekerjaan;
-      _selectedJenisTanah =
-          d['jenis_tanah']?.toString() ?? _selectedJenisTanah;
-      _geometryGeoJson = d['geometry']?.toString();
-
-      final kecId = d['op_kecamatan_id']?.toString();
-      if (kecId != null && kecId.isNotEmpty) {
-        _selectedKecamatanId = kecId;
-        final kel = await repo.getKelurahan(kecId);
-        if (mounted) {
-          setState(() {
-            _kelurahanList = kel;
-            _selectedKelurahanId = d['op_kelurahan_id']?.toString();
-          });
-        }
-      }
+      _applyInitialData(widget.initialData!);
     }
   }
 
@@ -290,6 +303,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
     setState(() => _isSubmitting = false);
 
     if (res.success) {
+      ref.invalidate(nopListProvider);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(res.message ?? 'Pengajuan berhasil dikirim.'),
@@ -407,6 +421,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              key: ValueKey('kec_$_selectedKecamatanId'),
               initialValue: _selectedKecamatanId,
               decoration: InputDecoration(
                 labelText: 'Kecamatan (Kota Solo) *',
@@ -420,6 +435,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              key: ValueKey('kel_${_selectedKecamatanId}_$_selectedKelurahanId'),
               initialValue: _selectedKelurahanId,
               decoration: InputDecoration(
                 labelText: 'Kelurahan *',
@@ -477,6 +493,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              key: ValueKey('subjek_$_selectedStatusSubjek'),
               initialValue: _selectedStatusSubjek,
               decoration: const InputDecoration(labelText: 'Status Subjek *'),
               items: PengajuanReferensi.statusSubjek.entries
@@ -486,6 +503,7 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              key: ValueKey('pek_$_selectedPekerjaan'),
               initialValue: _selectedPekerjaan,
               decoration: const InputDecoration(labelText: 'Pekerjaan *'),
               items: PengajuanReferensi.pekerjaan.entries
@@ -630,15 +648,20 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
               ),
               validator: (v) {
                 if (v == null || v.trim().isEmpty) return 'Luas tanah wajib diisi';
-                final numVal = double.tryParse(v.trim().replaceAll(',', '.'));
+                final cleaned = v.trim().replaceAll(',', '.');
+                final numVal = double.tryParse(cleaned);
                 if (numVal == null || numVal <= 0) {
                   return 'Luas tanah harus lebih dari 0';
+                }
+                if (!RegExp(r'^\d+(\.\d{1,2})?$').hasMatch(cleaned)) {
+                  return 'Maksimal 2 angka di belakang desimal';
                 }
                 return null;
               },
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(
+              key: ValueKey('tanah_$_selectedJenisTanah'),
               initialValue: _selectedJenisTanah,
               decoration: const InputDecoration(labelText: 'Jenis Tanah *'),
               items: PengajuanReferensi.jenisTanah.entries

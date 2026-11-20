@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
-        android:label="e_layanan_pbb_mobile"
+        android:label="E-Layanan PBB Solo"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

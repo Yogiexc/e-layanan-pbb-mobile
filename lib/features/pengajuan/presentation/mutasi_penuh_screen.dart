@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/utils/validators.dart';
 import '../../nop/data/nop_model.dart';
 import '../../nop/data/nop_repository.dart';
 import 'widgets/spop_form_scaffold.dart';
@@ -22,12 +23,45 @@ class MutasiPenuhScreen extends ConsumerStatefulWidget {
 
 class _MutasiPenuhScreenState extends ConsumerState<MutasiPenuhScreen> {
   String? _selectedNop;
-  NopItemModel? _selectedItem;
+  NopDetailModel? _nopDetail;
+  bool _loadingNop = false;
+  Map<String, dynamic>? _populatedForm;
 
   @override
   void initState() {
     super.initState();
     _selectedNop = widget.initialData?['nop']?.toString();
+    _populatedForm = widget.initialData;
+    if (_selectedNop != null && _selectedNop!.isNotEmpty) {
+      _loadNopDetail(_selectedNop!);
+    }
+  }
+
+  Future<void> _loadNopDetail(String nop) async {
+    setState(() => _loadingNop = true);
+    final res = await ref.read(nopRepositoryProvider).getNopDetail(nop);
+    if (!mounted) return;
+    setState(() {
+      _loadingNop = false;
+      if (res.success && res.data != null) {
+        _nopDetail = res.data;
+        if (widget.initialData == null) {
+          _populatedForm = {
+            'nop': nop,
+            'op_nama_jalan': _nopDetail!.opNamaJalan,
+            'op_blok_no': _nopDetail!.opBlokNo,
+            'op_kecamatan_id': _nopDetail!.opKecamatanId,
+            'op_kelurahan_id': _nopDetail!.opKelurahanId,
+            'op_rt': _nopDetail!.opRt,
+            'op_rw': _nopDetail!.opRw,
+            'luas_tanah': _nopDetail!.luasTanah.toStringAsFixed(0),
+            'jenis_tanah': _nopDetail!.jenisTanah,
+            'no_sertifikat': _nopDetail!.noSertifikat,
+            'jumlah_bangunan': _nopDetail!.jumlahBangunan.toString(),
+          };
+        }
+      }
+    });
   }
 
   @override
@@ -41,7 +75,7 @@ class _MutasiPenuhScreenState extends ConsumerState<MutasiPenuhScreen> {
       jenisSlug: 'mutasi_penuh',
       submitEndpoint:
           isRevisi ? '/pengajuan/${widget.revisiId}/revisi' : '/pengajuan/mutasi-penuh',
-      initialData: widget.initialData,
+      initialData: _populatedForm,
       existingBerkas: widget.existingBerkas,
       extraValidation: () {
         if (_selectedNop == null || _selectedNop!.isEmpty) {
@@ -87,34 +121,52 @@ class _MutasiPenuhScreenState extends ConsumerState<MutasiPenuhScreen> {
                     onChanged: isRevisi
                         ? null
                         : (val) {
-                            setState(() {
-                              _selectedNop = val;
-                              _selectedItem = validItems
-                                  .where((e) => e.nop == val)
-                                  .firstOrNull;
-                            });
+                            if (val != null) {
+                              setState(() => _selectedNop = val);
+                              _loadNopDetail(val);
+                            }
                           },
                   ),
-                  if (_selectedItem != null) ...[
-                    const SizedBox(height: 10),
+                  if (_loadingNop)
+                    const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: LinearProgressIndicator(),
+                    ),
+                  if (_nopDetail != null) ...[
+                    const SizedBox(height: 12),
                     Card(
                       child: Padding(
-                        padding: const EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(14),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              'Data Lama (Referensi)',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .labelMedium
-                                  ?.copyWith(fontWeight: FontWeight.w700),
+                            const Row(
+                              children: [
+                                Icon(Icons.info_outline, size: 18),
+                                SizedBox(width: 8),
+                                Text(
+                                  'Data Lama Objek & Subjek (Referensi Read-Only)',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
                             ),
+                            const Divider(height: 18),
+                            _detailRow('Alamat Objek', '${_nopDetail!.opNamaJalan} (RT ${_nopDetail!.opRt}/RW ${_nopDetail!.opRw})'),
+                            _detailRow('Wilayah', 'Kel. ${_nopDetail!.opKelurahanNama}, Kec. ${_nopDetail!.opKecamatanNama}'),
+                            _detailRow('Luas Tanah / Bangunan', '${_nopDetail!.luasTanah.toStringAsFixed(0)} m² / ${_nopDetail!.luasBangunan.toStringAsFixed(0)} m²'),
+                            _detailRow('Jenis Tanah / ZNT', '${_nopDetail!.jenisTanah} (ZNT: ${_nopDetail!.kodeZnt})'),
+                            _detailRow('Jml Bangunan / Sertifikat', '${_nopDetail!.jumlahBangunan} bgn / ${_nopDetail!.noSertifikat}'),
                             const SizedBox(height: 6),
-                            Text('Alamat: ${_selectedItem!.alamat}'),
-                            Text(
-                              'Luas Tanah: ${_selectedItem!.luasTanah.toStringAsFixed(0)} m²',
+                            const Text(
+                              'Wajib Pajak Lama:',
+                              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 12),
                             ),
+                            _detailRow('Nama / NIK', '${_nopDetail!.namaSubjek} (${AppValidators.maskNik(_nopDetail!.nik)})'),
+                            _detailRow('Alamat WP', _nopDetail!.alamatSubjek),
+                            _detailRow('NPWP / Pekerjaan', '${_nopDetail!.npwp} / ${_nopDetail!.pekerjaan}'),
                           ],
                         ),
                       ),
@@ -123,6 +175,24 @@ class _MutasiPenuhScreenState extends ConsumerState<MutasiPenuhScreen> {
                 ],
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _detailRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 130,
+            child: Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+          ),
+          Expanded(
+            child: Text(value, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
           ),
         ],
       ),

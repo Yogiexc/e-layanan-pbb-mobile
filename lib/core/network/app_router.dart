@@ -16,11 +16,21 @@ import '../../features/pengajuan/presentation/mutasi_penggabungan_screen.dart';
 import '../../features/pengajuan/presentation/sket_lokasi_screen.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
+  final authNotifier = ValueNotifier<AuthStatus>(AuthStatus.initial);
+
+  ref.listen<AuthState>(authProvider, (_, next) {
+    authNotifier.value = next.status;
+  });
+
+  ref.onDispose(() {
+    authNotifier.dispose();
+  });
 
   return GoRouter(
     initialLocation: '/',
+    refreshListenable: authNotifier,
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
       final isAuth = authState.status == AuthStatus.authenticated;
       final isLoggingIn = state.matchedLocation == '/login';
 
