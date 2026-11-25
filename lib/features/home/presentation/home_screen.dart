@@ -203,8 +203,8 @@ class HomeScreen extends ConsumerWidget {
                                     const SizedBox(height: 18),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                        vertical: 10,
+                                        horizontal: 10,
+                                        vertical: 8,
                                       ),
                                       decoration: BoxDecoration(
                                         color: AppTheme.primaryDeep
@@ -212,49 +212,89 @@ class HomeScreen extends ConsumerWidget {
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                       child: Wrap(
-                                        spacing: 16,
-                                        runSpacing: 8,
+                                        spacing: 8,
+                                        runSpacing: 6,
                                         children: [
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              const Icon(
-                                                Icons.schedule_rounded,
-                                                size: 16,
-                                                color: Color(0xFFFBBF24),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                '$pendingCount Menunggu',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
+                                          Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              borderRadius: BorderRadius.circular(8),
+                                              onTap: () => context.go('/nop'),
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 4,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    const Icon(
+                                                      Icons.schedule_rounded,
+                                                      size: 16,
+                                                      color: Color(0xFFFBBF24),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      '$pendingCount Menunggu',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(width: 4),
+                                                    const Icon(
+                                                      Icons.chevron_right_rounded,
+                                                      size: 14,
+                                                      color: Colors.white70,
+                                                    ),
+                                                  ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
-                                          Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                Icons.error_outline_rounded,
-                                                size: 16,
-                                                color: rejectedCount > 0
-                                                    ? const Color(0xFFFCA5A5)
-                                                    : Colors.white
-                                                        .withValues(alpha: 0.6),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                '$rejectedCount Perlu Revisi',
-                                                style: const TextStyle(
-                                                  color: Colors.white,
-                                                  fontSize: 12,
-                                                  fontWeight: FontWeight.w600,
+                                          Material(
+                                            color: Colors.transparent,
+                                            child: InkWell(
+                                              borderRadius: BorderRadius.circular(8),
+                                              onTap: () => context.go('/nop'),
+                                              child: Padding(
+                                                padding: const EdgeInsets.symmetric(
+                                                  horizontal: 6,
+                                                  vertical: 4,
+                                                ),
+                                                child: Row(
+                                                  mainAxisSize: MainAxisSize.min,
+                                                  children: [
+                                                    Icon(
+                                                      Icons.error_outline_rounded,
+                                                      size: 16,
+                                                      color: rejectedCount > 0
+                                                          ? const Color(0xFFFCA5A5)
+                                                          : Colors.white
+                                                              .withValues(alpha: 0.6),
+                                                    ),
+                                                    const SizedBox(width: 6),
+                                                    Text(
+                                                      '$rejectedCount Perlu Revisi',
+                                                      style: const TextStyle(
+                                                        color: Colors.white,
+                                                        fontSize: 12,
+                                                        fontWeight: FontWeight.w600,
+                                                      ),
+                                                    ),
+                                                    if (rejectedCount > 0) ...[
+                                                      const SizedBox(width: 4),
+                                                      const Icon(
+                                                        Icons.chevron_right_rounded,
+                                                        size: 14,
+                                                        color: Color(0xFFFCA5A5),
+                                                      ),
+                                                    ],
+                                                  ],
                                                 ),
                                               ),
-                                            ],
+                                            ),
                                           ),
                                         ],
                                       ),

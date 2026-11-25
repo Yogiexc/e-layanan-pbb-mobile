@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
@@ -14,6 +15,8 @@ class NopListScreen extends ConsumerStatefulWidget {
 
 class _NopListScreenState extends ConsumerState<NopListScreen> {
   String _selectedFilter = 'semua';
+  String _searchQuery = '';
+  final _searchController = TextEditingController();
 
   static const _filters = [
     ('semua', 'Semua'),
@@ -24,6 +27,12 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
   ];
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final nopAsync = ref.watch(nopListProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -32,6 +41,28 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
       appBar: AppBar(title: const Text('Objek Pajak (NOP)')),
       body: Column(
         children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Cari NOP, alamat, atau nomor pengajuan...',
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _searchQuery.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _searchQuery = '');
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                isDense: true,
+              ),
+              onChanged: (val) => setState(() => _searchQuery = val.trim().toLowerCase()),
+            ),
+          ),
           SizedBox(
             height: 48,
             child: ListView.separated(
@@ -99,7 +130,7 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                   ),
                 ),
                 data: (allItems) {
-                  final items = _selectedFilter == 'semua'
+                  var items = _selectedFilter == 'semua'
                       ? allItems
                       : allItems
                           .where(
@@ -107,6 +138,15 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                                 e.status.toLowerCase() == _selectedFilter,
                           )
                           .toList();
+
+                  if (_searchQuery.isNotEmpty) {
+                    items = items.where((e) {
+                      final nopMatch = e.nop?.toLowerCase().contains(_searchQuery) ?? false;
+                      final alamatMatch = e.alamat.toLowerCase().contains(_searchQuery);
+                      final noPengajuan = e.pengajuanTerakhir?.nomor.toLowerCase().contains(_searchQuery) ?? false;
+                      return nopMatch || alamatMatch || noPengajuan;
+                    }).toList();
+                  }
 
                   if (items.isEmpty) {
                     return ListView(
@@ -170,21 +210,52 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                                 Row(
                                   children: [
                                     Expanded(
-                                      child: Text(
-                                        item.nop ?? 'NOP belum terbit',
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w800,
-                                          color: item.nop == null
-                                              ? (isDark
-                                                  ? AppTheme.textSecondaryDark
-                                                  : AppTheme.textSecondaryLight)
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                        ),
+                                      child: Row(
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              item.nop ?? 'NOP belum terbit',
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w800,
+                                                color: item.nop == null
+                                                    ? (isDark
+                                                        ? AppTheme.textSecondaryDark
+                                                        : AppTheme.textSecondaryLight)
+                                                    : Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                              ),
+                                            ),
+                                          ),
+                                          if (item.nop != null) ...[
+                                            const SizedBox(width: 6),
+                                            InkWell(
+                                              borderRadius: BorderRadius.circular(6),
+                                              onTap: () {
+                                                Clipboard.setData(ClipboardData(text: item.nop!));
+                                                ScaffoldMessenger.of(context).showSnackBar(
+                                                  SnackBar(
+                                                    content: Text('NOP ${item.nop} disalin.'),
+                                                    duration: const Duration(seconds: 2),
+                                                    behavior: SnackBarBehavior.floating,
+                                                  ),
+                                                );
+                                              },
+                                              child: Padding(
+                                                padding: const EdgeInsets.all(4),
+                                                child: Icon(
+                                                  Icons.copy_rounded,
+                                                  size: 15,
+                                                  color: Theme.of(context).colorScheme.primary,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ],
                                       ),
                                     ),
+                                    const SizedBox(width: 8),
                                     StatusBadge(status: item.status),
                                   ],
                                 ),
