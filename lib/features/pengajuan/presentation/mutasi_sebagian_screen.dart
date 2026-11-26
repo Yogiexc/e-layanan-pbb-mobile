@@ -218,7 +218,9 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
                 labelText: 'Jumlah Bidang (Minimal 2) *',
+                suffixText: 'Bidang',
               ),
+              onChanged: (_) => setState(() {}),
               validator: (v) {
                 final parsed = int.tryParse(v?.trim() ?? '');
                 if (parsed == null || parsed < 2) {
@@ -227,6 +229,90 @@ class _MutasiSebagianScreenState extends ConsumerState<MutasiSebagianScreen> {
                 return null;
               },
             ),
+            if (_nopDetail != null) ...[
+              const SizedBox(height: 12),
+              Builder(
+                builder: (context) {
+                  final nBidang = int.tryParse(_jumlahBidangController.text.trim()) ?? 2;
+                  final validNBidang = nBidang < 2 ? 2 : (nBidang > 12 ? 12 : nBidang);
+                  final avgArea = _nopDetail!.luasTanah / validNBidang;
+
+                  return Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
+                      ),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Simulasi Pembagian Bidang',
+                              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 13),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF9E1B22).withValues(alpha: 0.1),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                'Est. ± ${avgArea.toStringAsFixed(1)} m² / bidang',
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w700,
+                                  fontSize: 11,
+                                  color: Color(0xFF9E1B22),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 12),
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: SizedBox(
+                            height: 12,
+                            child: Row(
+                              children: List.generate(validNBidang, (index) {
+                                final colors = [
+                                  const Color(0xFF9E1B22),
+                                  const Color(0xFFD49E35),
+                                  const Color(0xFF2E7D32),
+                                  const Color(0xFF1565C0),
+                                  const Color(0xFF6A1B9A),
+                                  const Color(0xFFE65100),
+                                ];
+                                final color = colors[index % colors.length];
+                                return Expanded(
+                                  child: Container(
+                                    margin: EdgeInsets.only(right: index == validNBidang - 1 ? 0 : 2),
+                                    color: color,
+                                  ),
+                                );
+                              }),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          'Total Luas Induk: ${_nopDetail!.luasTanah.toStringAsFixed(0)} m² akan dipecah menjadi $validNBidang bagian baru.',
+                          style: TextStyle(
+                            fontSize: 11.5,
+                            color: Theme.of(context).textTheme.bodySmall?.color,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+              ),
+            ],
             const SizedBox(height: 16),
             TextFormField(
               controller: _keteranganController,

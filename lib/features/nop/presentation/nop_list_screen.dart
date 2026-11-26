@@ -73,8 +73,34 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
               itemBuilder: (context, index) {
                 final (key, label) = _filters[index];
                 final active = _selectedFilter == key;
+                final allItems = nopAsync.maybeWhen(data: (l) => l, orElse: () => []);
+                final count = key == 'semua'
+                    ? allItems.length
+                    : allItems.where((e) => e.status.toLowerCase() == key).length;
+
                 return ChoiceChip(
-                  label: Text(label),
+                  label: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(label),
+                      const SizedBox(width: 5),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 1.5),
+                        decoration: BoxDecoration(
+                          color: active ? Colors.white.withValues(alpha: 0.25) : Theme.of(context).colorScheme.surfaceContainerHighest,
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: Text(
+                          '$count',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w700,
+                            color: active ? Colors.white : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                   selected: active,
                   showCheckmark: false,
                   labelStyle: TextStyle(
@@ -191,6 +217,12 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                     separatorBuilder: (_, _) => const SizedBox(height: 12),
                     itemBuilder: (context, index) {
                       final item = items[index];
+                      final statusColor = item.status.toLowerCase() == 'ditolak'
+                          ? AppTheme.statusRejectedText
+                          : item.status.toLowerCase() == 'menunggu'
+                              ? AppTheme.statusPendingText
+                              : AppTheme.statusApprovedText;
+
                       return Container(
                         decoration: BoxDecoration(
                           color: Theme.of(context).colorScheme.surface,
@@ -207,176 +239,188 @@ class _NopListScreenState extends ConsumerState<NopListScreen> {
                             ),
                           ],
                         ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => context.push('/nop/detail', extra: item),
-                            borderRadius: BorderRadius.circular(20),
-                            splashColor: AppTheme.primary.withValues(alpha: 0.06),
-                            child: Padding(
-                              padding: const EdgeInsets.all(18),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Container(
-                                        padding: const EdgeInsets.all(7),
-                                        decoration: BoxDecoration(
-                                          color: AppTheme.primary.withValues(alpha: 0.08),
-                                          borderRadius: BorderRadius.circular(10),
-                                        ),
-                                        child: const Icon(
-                                          Icons.receipt_rounded,
-                                          size: 16,
-                                          color: AppTheme.primary,
-                                        ),
-                                      ),
-                                      const SizedBox(width: 10),
-                                      Expanded(
-                                        child: Row(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              // Stitch-inspired color-coded top accent strip
+                              Container(
+                                height: 3.5,
+                                color: statusColor,
+                              ),
+                              Material(
+                                color: Colors.transparent,
+                                child: InkWell(
+                                  onTap: () => context.push('/nop/detail', extra: item),
+                                  splashColor: AppTheme.primary.withValues(alpha: 0.06),
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(18),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
                                           children: [
-                                            Flexible(
-                                              child: Text(
-                                                item.nop ?? 'NOP belum terbit',
-                                                style: TextStyle(
-                                                  fontSize: 15,
-                                                  fontWeight: FontWeight.w800,
-                                                  letterSpacing: -0.2,
-                                                  color: item.nop == null
-                                                      ? (isDark
-                                                          ? AppTheme.textSecondaryDark
-                                                          : AppTheme.textSecondaryLight)
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurface,
-                                                ),
+                                            Container(
+                                              padding: const EdgeInsets.all(7),
+                                              decoration: BoxDecoration(
+                                                color: statusColor.withValues(alpha: 0.1),
+                                                borderRadius: BorderRadius.circular(10),
+                                              ),
+                                              child: Icon(
+                                                Icons.receipt_rounded,
+                                                size: 16,
+                                                color: statusColor,
                                               ),
                                             ),
-                                            if (item.nop != null) ...[
-                                              const SizedBox(width: 6),
-                                              InkWell(
-                                                borderRadius: BorderRadius.circular(6),
-                                                onTap: () {
-                                                  Clipboard.setData(ClipboardData(text: item.nop!));
-                                                  ScaffoldMessenger.of(context).showSnackBar(
-                                                    SnackBar(
-                                                      content: Text('NOP ${item.nop} disalin.'),
-                                                      duration: const Duration(seconds: 2),
-                                                      behavior: SnackBarBehavior.floating,
+                                            const SizedBox(width: 10),
+                                            Expanded(
+                                              child: Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      item.nop ?? 'NOP belum terbit',
+                                                      style: TextStyle(
+                                                        fontSize: 15,
+                                                        fontWeight: FontWeight.w800,
+                                                        letterSpacing: -0.2,
+                                                        color: item.nop == null
+                                                            ? (isDark
+                                                                ? AppTheme.textSecondaryDark
+                                                                : AppTheme.textSecondaryLight)
+                                                            : Theme.of(context)
+                                                                .colorScheme
+                                                                .onSurface,
+                                                      ),
                                                     ),
-                                                  );
-                                                },
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(4),
-                                                  child: Icon(
-                                                    Icons.copy_rounded,
-                                                    size: 15,
-                                                    color: Theme.of(context).colorScheme.primary,
                                                   ),
-                                                ),
+                                                  if (item.nop != null) ...[
+                                                    const SizedBox(width: 6),
+                                                    InkWell(
+                                                      borderRadius: BorderRadius.circular(6),
+                                                      onTap: () {
+                                                        Clipboard.setData(ClipboardData(text: item.nop!));
+                                                        ScaffoldMessenger.of(context).showSnackBar(
+                                                          SnackBar(
+                                                            content: Text('NOP ${item.nop} disalin.'),
+                                                            duration: const Duration(seconds: 2),
+                                                            behavior: SnackBarBehavior.floating,
+                                                          ),
+                                                        );
+                                                      },
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.all(4),
+                                                        child: Icon(
+                                                          Icons.copy_rounded,
+                                                          size: 15,
+                                                          color: Theme.of(context).colorScheme.primary,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ],
                                               ),
-                                            ],
+                                            ),
+                                            const SizedBox(width: 8),
+                                            StatusBadge(status: item.status),
                                           ],
                                         ),
-                                      ),
-                                      const SizedBox(width: 8),
-                                      StatusBadge(status: item.status),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 14),
-                                  Row(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Icon(
-                                        Icons.location_on_outlined,
-                                        size: 16,
-                                        color: isDark
-                                            ? AppTheme.textSecondaryDark
-                                            : AppTheme.textSecondaryLight,
-                                      ),
-                                      const SizedBox(width: 6),
-                                      Expanded(
-                                        child: Text(
-                                          item.alamat,
-                                          style: const TextStyle(
-                                            fontSize: 13,
-                                            height: 1.35,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  const SizedBox(height: 14),
-                                  const Divider(),
-                                  const SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Row(
-                                        children: [
-                                          Icon(
-                                            Icons.square_foot_rounded,
-                                            size: 15,
-                                            color: isDark
-                                                ? AppTheme.textSecondaryDark
-                                                : AppTheme.textSecondaryLight,
-                                          ),
-                                          const SizedBox(width: 4),
-                                          Text(
-                                            '${item.luasTanah.toStringAsFixed(0)} m²',
-                                            style: TextStyle(
-                                              fontSize: 12.5,
-                                              fontWeight: FontWeight.w700,
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .onSurface,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      Row(
-                                        children: [
-                                          if (item.pengajuanTerakhir != null) ...[
-                                            Container(
-                                              padding: const EdgeInsets.symmetric(
-                                                horizontal: 7,
-                                                vertical: 2,
-                                              ),
-                                              decoration: BoxDecoration(
-                                                color: Theme.of(context)
-                                                    .colorScheme
-                                                    .outline
-                                                    .withValues(alpha: 0.35),
-                                                borderRadius:
-                                                    BorderRadius.circular(6),
-                                              ),
-                                              child: Text(
-                                                item.pengajuanTerakhir!.nomor,
-                                                style: TextStyle(
-                                                  fontSize: 11,
-                                                  fontWeight: FontWeight.w700,
-                                                  color: Theme.of(context)
-                                                      .colorScheme
-                                                      .onSurface,
-                                                ),
-                                              ),
+                                        const SizedBox(height: 14),
+                                        Row(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: [
+                                            Icon(
+                                              Icons.location_on_outlined,
+                                              size: 16,
+                                              color: isDark
+                                                  ? AppTheme.textSecondaryDark
+                                                  : AppTheme.textSecondaryLight,
                                             ),
                                             const SizedBox(width: 6),
+                                            Expanded(
+                                              child: Text(
+                                                item.alamat,
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  height: 1.35,
+                                                ),
+                                              ),
+                                            ),
                                           ],
-                                          const Icon(
-                                            Icons.arrow_forward_ios_rounded,
-                                            size: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                        ),
+                                        const SizedBox(height: 14),
+                                        const Divider(),
+                                        const SizedBox(height: 10),
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                          children: [
+                                            Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.square_foot_rounded,
+                                                  size: 15,
+                                                  color: isDark
+                                                      ? AppTheme.textSecondaryDark
+                                                      : AppTheme.textSecondaryLight,
+                                                ),
+                                                const SizedBox(width: 4),
+                                                Text(
+                                                  '${item.luasTanah.toStringAsFixed(0)} m²',
+                                                  style: TextStyle(
+                                                    fontSize: 12.5,
+                                                    fontWeight: FontWeight.w700,
+                                                    color: Theme.of(context)
+                                                        .colorScheme
+                                                        .onSurface,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            Row(
+                                              children: [
+                                                if (item.pengajuanTerakhir != null) ...[
+                                                  Container(
+                                                    padding: const EdgeInsets.symmetric(
+                                                      horizontal: 7,
+                                                      vertical: 2,
+                                                    ),
+                                                    decoration: BoxDecoration(
+                                                      color: Theme.of(context)
+                                                          .colorScheme
+                                                          .outline
+                                                          .withValues(alpha: 0.35),
+                                                      borderRadius:
+                                                          BorderRadius.circular(6),
+                                                    ),
+                                                    child: Text(
+                                                      item.pengajuanTerakhir!.nomor,
+                                                      style: TextStyle(
+                                                        fontSize: 11,
+                                                        fontWeight: FontWeight.w700,
+                                                        color: Theme.of(context)
+                                                            .colorScheme
+                                                            .onSurface,
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(width: 6),
+                                                ],
+                                                const Icon(
+                                                  Icons.arrow_forward_ios_rounded,
+                                                  size: 12,
+                                                  color: Colors.grey,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
                                   ),
-                                ],
+                                ),
                               ),
-                            ),
+                            ],
                           ),
                         ),
                       );

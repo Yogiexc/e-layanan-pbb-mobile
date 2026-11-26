@@ -3,15 +3,23 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive_layout.dart';
+import '../../../core/utils/validators.dart';
 import '../../auth/presentation/auth_notifier.dart';
 import '../../nop/data/nop_repository.dart';
 import '../../nop/presentation/status_badge.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  bool _showNik = false;
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(authProvider).user;
     final nopAsync = ref.watch(nopListProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -22,6 +30,7 @@ class HomeScreen extends ConsumerWidget {
     final totalNop = allItems.length;
     final pendingCount = allItems.where((e) => e.status == 'menunggu').length;
     final rejectedCount = allItems.where((e) => e.status == 'ditolak').length;
+    final approvedCount = allItems.where((e) => e.status == 'terdaftar' || e.status == 'disetujui').length;
     final recentItems = allItems.take(3).toList();
 
     final initials = (user?.name.isNotEmpty == true ? user!.name : 'WP')
@@ -30,6 +39,9 @@ class HomeScreen extends ConsumerWidget {
         .take(2)
         .map((e) => e.isNotEmpty ? e[0].toUpperCase() : '')
         .join();
+
+    final rawNik = user?.nik ?? '3372000000000001';
+    final formattedNik = _showNik ? rawNik : AppValidators.maskNik(rawNik);
 
     return Scaffold(
       body: SafeArea(
@@ -102,7 +114,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 18),
 
-                      // Summary Card (Premium Banking Glass Card)
+                      // Summary Card (Surakarta Royal Crimson Banking Card)
                       Container(
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(24),
@@ -218,6 +230,34 @@ class HomeScreen extends ConsumerWidget {
                                         ],
                                       ),
                                       const SizedBox(height: 16),
+                                      // NIK with show/hide toggle (Adapted from Stitch Bank Card UX)
+                                      Row(
+                                        children: [
+                                          Text(
+                                            'NIK: $formattedNik',
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(alpha: 0.9),
+                                              fontSize: 13,
+                                              letterSpacing: 1.1,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InkWell(
+                                            borderRadius: BorderRadius.circular(12),
+                                            onTap: () => setState(() => _showNik = !_showNik),
+                                            child: Padding(
+                                              padding: const EdgeInsets.all(4),
+                                              child: Icon(
+                                                _showNik ? Icons.visibility_off : Icons.visibility,
+                                                size: 16,
+                                                color: AppTheme.accentGold,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 10),
                                       Row(
                                         crossAxisAlignment: CrossAxisAlignment.baseline,
                                         textBaseline: TextBaseline.alphabetic,
@@ -251,97 +291,136 @@ class HomeScreen extends ConsumerWidget {
                                           fontSize: 11.5,
                                         ),
                                       ),
-                                    const SizedBox(height: 18),
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 8,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: AppTheme.primaryDeep
-                                            .withValues(alpha: 0.7),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Wrap(
-                                        spacing: 8,
-                                        runSpacing: 6,
+                                      const SizedBox(height: 16),
+                                      // 3-Metric status indicators (Menunggu, Perlu Revisi, Terdaftar)
+                                      Row(
                                         children: [
-                                          Material(
-                                            color: Colors.transparent,
+                                          Expanded(
                                             child: InkWell(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                               onTap: () => context.go('/nop'),
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 4,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.25),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
                                                 ),
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    const Icon(
-                                                      Icons.schedule_rounded,
-                                                      size: 16,
-                                                      color: Color(0xFFFBBF24),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          width: 7,
+                                                          height: 7,
+                                                          decoration: const BoxDecoration(
+                                                            color: Color(0xFFFBBF24),
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 6),
+                                                        const Text(
+                                                          'Menunggu',
+                                                          style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    const SizedBox(width: 6),
+                                                    const SizedBox(height: 4),
                                                     Text(
-                                                      '$pendingCount Menunggu',
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.w600,
-                                                      ),
-                                                    ),
-                                                    const SizedBox(width: 4),
-                                                    const Icon(
-                                                      Icons.chevron_right_rounded,
-                                                      size: 14,
-                                                      color: Colors.white70,
+                                                      '$pendingCount',
+                                                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
                                                     ),
                                                   ],
                                                 ),
                                               ),
                                             ),
                                           ),
-                                          Material(
-                                            color: Colors.transparent,
+                                          const SizedBox(width: 8),
+                                          Expanded(
                                             child: InkWell(
-                                              borderRadius: BorderRadius.circular(8),
+                                              borderRadius: BorderRadius.circular(12),
                                               onTap: () => context.go('/nop'),
-                                              child: Padding(
-                                                padding: const EdgeInsets.symmetric(
-                                                  horizontal: 6,
-                                                  vertical: 4,
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  color: rejectedCount > 0 ? const Color(0xFFDC2626).withValues(alpha: 0.35) : Colors.black.withValues(alpha: 0.25),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(
+                                                    color: rejectedCount > 0 ? const Color(0xFFFCA5A5).withValues(alpha: 0.4) : Colors.white.withValues(alpha: 0.1),
+                                                  ),
                                                 ),
-                                                child: Row(
-                                                  mainAxisSize: MainAxisSize.min,
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
                                                   children: [
-                                                    Icon(
-                                                      Icons.error_outline_rounded,
-                                                      size: 16,
-                                                      color: rejectedCount > 0
-                                                          ? const Color(0xFFFCA5A5)
-                                                          : Colors.white
-                                                              .withValues(alpha: 0.6),
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          width: 7,
+                                                          height: 7,
+                                                          decoration: BoxDecoration(
+                                                            color: rejectedCount > 0 ? const Color(0xFFEF4444) : Colors.white38,
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 6),
+                                                        const Text(
+                                                          'Perlu Revisi',
+                                                          style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+                                                        ),
+                                                      ],
                                                     ),
-                                                    const SizedBox(width: 6),
+                                                    const SizedBox(height: 4),
                                                     Text(
-                                                      '$rejectedCount Perlu Revisi',
-                                                      style: const TextStyle(
-                                                        color: Colors.white,
-                                                        fontSize: 12,
-                                                        fontWeight: FontWeight.w600,
+                                                      '$rejectedCount',
+                                                      style: TextStyle(
+                                                        color: rejectedCount > 0 ? const Color(0xFFFCA5A5) : Colors.white,
+                                                        fontSize: 16,
+                                                        fontWeight: FontWeight.w800,
                                                       ),
                                                     ),
-                                                    if (rejectedCount > 0) ...[
-                                                      const SizedBox(width: 4),
-                                                      const Icon(
-                                                        Icons.chevron_right_rounded,
-                                                        size: 14,
-                                                        color: Color(0xFFFCA5A5),
-                                                      ),
-                                                    ],
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Expanded(
+                                            child: InkWell(
+                                              borderRadius: BorderRadius.circular(12),
+                                              onTap: () => context.go('/nop'),
+                                              child: Container(
+                                                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                                                decoration: BoxDecoration(
+                                                  color: Colors.black.withValues(alpha: 0.25),
+                                                  borderRadius: BorderRadius.circular(12),
+                                                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                                                ),
+                                                child: Column(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+                                                    Row(
+                                                      children: [
+                                                        Container(
+                                                          width: 7,
+                                                          height: 7,
+                                                          decoration: const BoxDecoration(
+                                                            color: Color(0xFF34D399),
+                                                            shape: BoxShape.circle,
+                                                          ),
+                                                        ),
+                                                        const SizedBox(width: 6),
+                                                        const Text(
+                                                          'Aktif',
+                                                          style: TextStyle(color: Colors.white70, fontSize: 11, fontWeight: FontWeight.w500),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                    const SizedBox(height: 4),
+                                                    Text(
+                                                      '$approvedCount',
+                                                      style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w800),
+                                                    ),
                                                   ],
                                                 ),
                                               ),
@@ -349,16 +428,68 @@ class HomeScreen extends ConsumerWidget {
                                           ),
                                         ],
                                       ),
-                                    ),
-                                  ],
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(height: 20),
+
+                      // Bapenda Official Info Banner (from Stitch template)
+                      Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: AppTheme.accentGold.withValues(alpha: isDark ? 0.12 : 0.08),
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(
+                            color: AppTheme.accentGold.withValues(alpha: 0.3),
+                          ),
+                        ),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(8),
+                              decoration: BoxDecoration(
+                                color: AppTheme.accentGold.withValues(alpha: 0.2),
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(
+                                Icons.campaign_rounded,
+                                color: AppTheme.primary,
+                                size: 20,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Pemberitahuan Bapenda Surakarta',
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w700,
+                                      fontSize: 12.5,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    'Layanan verifikasi berkas beroperasi Senin-Jumat pukul 08:00 - 15:30 WIB.',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: secondaryColor,
+                                      height: 1.3,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 24),
+                      const SizedBox(height: 20),
 
                       // Services: reflows cleanly on very narrow vs medium/wide
                       const Text(
