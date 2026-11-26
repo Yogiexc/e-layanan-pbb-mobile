@@ -102,104 +102,155 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       const SizedBox(height: 18),
 
-                      // Summary Card
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Container(
-                          color: AppTheme.primary,
-                          child: Stack(
-                            children: [
-                              Positioned(
-                                right: -36,
-                                top: -36,
-                                child: Container(
-                                  width: 140,
-                                  height: 140,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white.withValues(alpha: 0.08),
-                                      width: 24,
+                      // Summary Card (Premium Banking Glass Card)
+                      Container(
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primaryDeep.withValues(alpha: 0.28),
+                              blurRadius: 24,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(24),
+                          child: Container(
+                            decoration: const BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color(0xFF8B121A),
+                                  Color(0xFF6B0E14),
+                                  Color(0xFF4A080C),
+                                ],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                            ),
+                            child: Stack(
+                              children: [
+                                // Subtle Geometric Card Pattern
+                                Positioned(
+                                  right: -40,
+                                  top: -40,
+                                  child: Container(
+                                    width: 170,
+                                    height: 170,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: AppTheme.accentGold.withValues(alpha: 0.12),
+                                        width: 28,
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              Padding(
-                                padding: EdgeInsets.all(isCompact ? 18 : 22),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Flexible(
-                                          child: Text(
-                                            'OBJEK PAJAK TERDAFTAR',
-                                            overflow: TextOverflow.ellipsis,
-                                            style: TextStyle(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.72),
-                                              fontSize: 11,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 0.8,
+                                Positioned(
+                                  right: 20,
+                                  bottom: -50,
+                                  child: Container(
+                                    width: 120,
+                                    height: 120,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(alpha: 0.03),
+                                    ),
+                                  ),
+                                ),
+                                Padding(
+                                  padding: EdgeInsets.all(isCompact ? 20 : 24),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.all(6),
+                                                decoration: BoxDecoration(
+                                                  color: AppTheme.accentGold.withValues(alpha: 0.2),
+                                                  borderRadius: BorderRadius.circular(8),
+                                                ),
+                                                child: const Icon(
+                                                  Icons.account_balance_rounded,
+                                                  size: 14,
+                                                  color: AppTheme.accentGold,
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                'E-LAYANAN PBB SURAKARTA',
+                                                overflow: TextOverflow.ellipsis,
+                                                style: TextStyle(
+                                                  color: Colors.white.withValues(alpha: 0.85),
+                                                  fontSize: 11,
+                                                  fontWeight: FontWeight.w800,
+                                                  letterSpacing: 0.9,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 9,
+                                              vertical: 4,
+                                            ),
+                                            decoration: BoxDecoration(
+                                              color: Colors.black.withValues(alpha: 0.25),
+                                              borderRadius: BorderRadius.circular(8),
+                                              border: Border.all(
+                                                color: Colors.white.withValues(alpha: 0.15),
+                                              ),
+                                            ),
+                                            child: const Text(
+                                              'Bapenda Solo',
+                                              style: TextStyle(
+                                                color: AppTheme.accentGold,
+                                                fontSize: 10,
+                                                fontWeight: FontWeight.w700,
+                                              ),
                                             ),
                                           ),
-                                        ),
-                                        const SizedBox(width: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 3,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: Colors.white
-                                                .withValues(alpha: 0.14),
-                                            borderRadius:
-                                                BorderRadius.circular(6),
-                                          ),
-                                          child: const Text(
-                                            'Bapenda Solo',
+                                        ],
+                                      ),
+                                      const SizedBox(height: 16),
+                                      Row(
+                                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                                        textBaseline: TextBaseline.alphabetic,
+                                        children: [
+                                          Text(
+                                            '$totalNop',
                                             style: TextStyle(
                                               color: Colors.white,
-                                              fontSize: 10,
+                                              fontSize: isCompact ? 38 : 44,
+                                              fontWeight: FontWeight.w800,
+                                              letterSpacing: -1.2,
+                                              height: 1,
+                                            ),
+                                          ),
+                                          const SizedBox(width: 8),
+                                          Text(
+                                            'Objek Pajak (NOP)',
+                                            style: TextStyle(
+                                              color: Colors.white.withValues(alpha: 0.85),
+                                              fontSize: 13,
                                               fontWeight: FontWeight.w600,
                                             ),
                                           ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Text(
+                                        'Kelola status pendaftaran, ketetapan, & berkas mutasi',
+                                        style: TextStyle(
+                                          color: Colors.white.withValues(alpha: 0.65),
+                                          fontSize: 11.5,
                                         ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 10),
-                                    Wrap(
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.end,
-                                      spacing: 8,
-                                      children: [
-                                        Text(
-                                          '$totalNop',
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: isCompact ? 34 : 40,
-                                            fontWeight: FontWeight.w800,
-                                            letterSpacing: -1.2,
-                                            height: 1,
-                                          ),
-                                        ),
-                                        Padding(
-                                          padding:
-                                              const EdgeInsets.only(bottom: 4),
-                                          child: Text(
-                                            'NOP aktif & diajukan',
-                                            style: TextStyle(
-                                              color: Colors.white
-                                                  .withValues(alpha: 0.8),
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
+                                      ),
                                     const SizedBox(height: 18),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
@@ -305,6 +356,7 @@ class HomeScreen extends ConsumerWidget {
                             ],
                           ),
                         ),
+                      ),
                       ),
                       const SizedBox(height: 24),
 
@@ -517,41 +569,76 @@ class _QuickServiceTile extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Theme.of(context).colorScheme.outline),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline,
+          width: 1.2,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Icon(
-                icon,
-                color: Theme.of(context).colorScheme.primary,
-                size: 24,
-              ),
-              const SizedBox(height: 14),
-              Text(
-                title,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 15,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -0.2,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(20),
+          splashColor: AppTheme.primary.withValues(alpha: 0.08),
+          child: Padding(
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primary.withValues(alpha: 0.08),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Icon(
+                        icon,
+                        color: AppTheme.primary,
+                        size: 24,
+                      ),
+                    ),
+                    Icon(
+                      Icons.arrow_outward_rounded,
+                      size: 18,
+                      color: secondaryColor.withValues(alpha: 0.6),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                subtitle,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(fontSize: 12, color: secondaryColor),
-              ),
-            ],
+                const SizedBox(height: 16),
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: -0.3,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: secondaryColor,
+                    height: 1.3,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

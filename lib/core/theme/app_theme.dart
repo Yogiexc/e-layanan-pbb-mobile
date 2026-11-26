@@ -2,31 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
-  static const Color primary = Color(0xFF9E1B22);
-  static const Color primaryDeep = Color(0xFF6E0E14);
-  static const Color primarySoft = Color(0xFFFDF2F2);
-  static const Color accentGold = Color(0xFFC68A1E);
+  // Surakarta Royal Crimson & Banking Elegance
+  static const Color primary = Color(0xFF8B121A); // Deep Royal Crimson
+  static const Color primaryDeep = Color(0xFF5A080E); // Midnight Maroon
+  static const Color primaryLight = Color(0xFFBA222C); // Vibrant Crimson
+  static const Color primarySoft = Color(0xFFFBF1F2); // Soft Tint
+  static const Color accentGold = Color(0xFFD49E35); // Keraton Metallic Gold
+  static const Color accentGoldLight = Color(0xFFF9F1DC); // Soft Gold Champagne
 
-  static const Color bgLight = Color(0xFFF8F8F9);
+  // Light Theme Palette (Clean, High-end Neo-Banking)
+  static const Color bgLight = Color(0xFFF6F7F9); // Studio Warm Gray
   static const Color surfaceLight = Color(0xFFFFFFFF);
-  static const Color borderLight = Color(0xFFEAEAEF);
-  static const Color textPrimaryLight = Color(0xFF111315);
-  static const Color textSecondaryLight = Color(0xFF6B7280);
+  static const Color surfaceSubtleLight = Color(0xFFF0F2F5);
+  static const Color borderLight = Color(0xFFE4E7EC);
+  static const Color textPrimaryLight = Color(0xFF101828); // Slate 900
+  static const Color textSecondaryLight = Color(0xFF667085); // Slate 500
+  static const Color textTertiaryLight = Color(0xFF98A2B3); // Slate 400
 
-  static const Color bgDark = Color(0xFF0E0F11);
-  static const Color surfaceDark = Color(0xFF17191C);
-  static const Color borderDark = Color(0xFF26292E);
-  static const Color textPrimaryDark = Color(0xFFF4F5F7);
-  static const Color textSecondaryDark = Color(0xFF9CA3AF);
+  // Dark Theme Palette (Executive Obsidian)
+  static const Color bgDark = Color(0xFF0C0E12); // Deep Obsidian
+  static const Color surfaceDark = Color(0xFF151921); // Charcoal Slate
+  static const Color surfaceSubtleDark = Color(0xFF1E232E);
+  static const Color borderDark = Color(0xFF282F3D);
+  static const Color textPrimaryDark = Color(0xFFF8FAFC);
+  static const Color textSecondaryDark = Color(0xFF94A3B8);
+  static const Color textTertiaryDark = Color(0xFF64748B);
 
+  // Status Colors (Refined Fintech)
   static const Color statusPendingText = Color(0xFFB45309);
   static const Color statusPendingBg = Color(0xFFFEF3C7);
+  static const Color statusPendingBorder = Color(0xFFFDE68A);
 
   static const Color statusRejectedText = Color(0xFFB91C1C);
   static const Color statusRejectedBg = Color(0xFFFEE2E2);
+  static const Color statusRejectedBorder = Color(0xFFFECACA);
 
-  static const Color statusApprovedText = Color(0xFF15803D);
-  static const Color statusApprovedBg = Color(0xFFDCFCE7);
+  static const Color statusApprovedText = Color(0xFF047857);
+  static const Color statusApprovedBg = Color(0xFFD1FAE5);
+  static const Color statusApprovedBorder = Color(0xFFA7F3D0);
 
   static ThemeData get lightTheme {
     final textTheme = GoogleFonts.plusJakartaSansTextTheme(
@@ -70,8 +83,8 @@ class AppTheme {
         elevation: 0,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-          side: const BorderSide(color: borderLight, width: 1),
+          borderRadius: BorderRadius.circular(20),
+          side: const BorderSide(color: borderLight, width: 1.2),
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -83,9 +96,10 @@ class AppTheme {
           textStyle: GoogleFonts.plusJakartaSans(
             fontSize: 15,
             fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
@@ -100,7 +114,7 @@ class AppTheme {
             fontWeight: FontWeight.w600,
           ),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(14),
           ),
         ),
       ),
@@ -114,23 +128,23 @@ class AppTheme {
           fontWeight: FontWeight.w500,
         ),
         hintStyle: GoogleFonts.plusJakartaSans(
-          color: const Color(0xFF9CA3AF),
+          color: textTertiaryLight,
           fontSize: 14,
         ),
         border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderLight),
         ),
         enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: borderLight),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: primary, width: 1.6),
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(color: primary, width: 1.8),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(14),
           borderSide: const BorderSide(color: statusRejectedText),
         ),
       ),
