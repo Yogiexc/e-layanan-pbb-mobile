@@ -11,7 +11,7 @@
 - Tulis semua teks antarmuka dalam Bahasa Indonesia.
 
 ## Aturan Kerja untuk AI Agent (wajib dipatuhi)
-
+ 
 ### Kualitas kode
 
 - **Hindari over-engineering.** Ini prototype demo. Kerjakan yang diminta PRD dengan solusi paling sederhana yang benar. Jangan menambah lapisan abstraksi, pola desain, paket, atau fitur yang tidak dibutuhkan (prinsip YAGNI dan KISS).
