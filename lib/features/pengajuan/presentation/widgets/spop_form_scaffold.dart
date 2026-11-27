@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -158,7 +159,15 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
     _selectedPekerjaan = d['pekerjaan']?.toString() ?? _selectedPekerjaan;
     _selectedJenisTanah =
         d['jenis_tanah']?.toString() ?? _selectedJenisTanah;
-    _geometryGeoJson = d['geometry']?.toString() ?? _geometryGeoJson;
+
+    final rawGeo = d['geometry'];
+    if (rawGeo != null) {
+      if (rawGeo is String) {
+        _geometryGeoJson = rawGeo;
+      } else if (rawGeo is Map) {
+        _geometryGeoJson = jsonEncode(rawGeo);
+      }
+    }
 
     final kecId = d['op_kecamatan_id']?.toString();
     if (kecId != null && kecId.isNotEmpty) {
@@ -313,7 +322,12 @@ class _SpopFormScaffoldState extends ConsumerState<SpopFormScaffold> {
       context.go('/nop');
     } else {
       setState(() => _serverErrors = res.errors);
-      _showError(res.message ?? 'Pengajuan gagal dikirim.');
+      String detailPesan = res.message ?? 'Pengajuan gagal dikirim.';
+      if (res.errors != null && res.errors!.isNotEmpty) {
+        final errEntries = res.errors!.entries.map((e) => '${e.key}: ${e.value.join(", ")}').join('; ');
+        detailPesan = '$detailPesan ($errEntries)';
+      }
+      _showError(detailPesan);
     }
   }
 

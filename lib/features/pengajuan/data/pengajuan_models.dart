@@ -278,7 +278,17 @@ class PengajuanDetailModel {
   factory PengajuanDetailModel.fromJson(Map<String, dynamic> json) {
     final rawBerkas = json['berkas'];
     final parsedBerkas = <String, String>{};
-    if (rawBerkas is Map) {
+    if (rawBerkas is List) {
+      for (final item in rawBerkas) {
+        if (item is Map) {
+          final key = item['key']?.toString();
+          final fileName = item['nama_file']?.toString() ?? item['nama_jenis']?.toString() ?? 'Tersimpan';
+          if (key != null && key.isNotEmpty) {
+            parsedBerkas[key] = fileName;
+          }
+        }
+      }
+    } else if (rawBerkas is Map) {
       rawBerkas.forEach((k, v) {
         if (v != null) parsedBerkas[k.toString()] = v.toString();
       });
